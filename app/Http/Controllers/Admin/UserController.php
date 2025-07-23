@@ -565,15 +565,13 @@ class UserController extends Controller
                     // 'linkedin_profile'                  => $postData['linkedin_profile'],
                     'youtube_profile'                   => $postData['youtube_profile'],
                     'topbar_text'                       => $postData['topbar_text'],
-                    'shipping_charge'                   => $postData['shipping_charge'],
-                    'tax_percent'                       => $postData['tax_percent'],
                     'site_logo'                         => $site_logo,
                     'site_footer_logo'                  => $site_footer_logo,
                     'site_favicon'                      => $site_favicon,
                 ];
                 // Helper::pr($fields);
                 GeneralSetting::where('id', '=', 1)->update($fields);
-                Product::where('shipping_type', '=', 'FIXED')->update(['shipping_rate' => $postData['shipping_charge']]);
+                // Product::where('shipping_type', '=', 'FIXED')->update(['shipping_rate' => $postData['shipping_charge']]);
                 return redirect()->back()->with('success_message', 'General Settings Updated Successfully !!!');
             } else {
                 return redirect()->back()->with('error_message', 'All Fields Required !!!');
@@ -815,6 +813,31 @@ class UserController extends Controller
                 ];
                 GeneralSetting::where('id', '=', 1)->update($fields);
                 return redirect()->back()->with('success_message', 'Color Settings Updated Successfully !!!');
+            } else {
+                return redirect()->back()->with('error_message', 'All Fields Required !!!');
+            }
+        }
+        public function shipping_settings(Request $request){
+            $postData = $request->all();
+            $rules = [
+                'tax_percent'                                               => 'required',
+                'domestic_free_shipping_min_amount'                         => 'required',
+                'domestic_shipping_single_item'                             => 'required',
+                'domestic_shipping_multiple_item'                           => 'required',
+                'international_shipping_single_item'                        => 'required',
+                'international_shipping_multiple_item'                      => 'required',
+            ];
+            if($this->validate($request, $rules)){
+                $fields = [
+                    'tax_percent'                                               => $postData['tax_percent'],
+                    'domestic_free_shipping_min_amount'                         => $postData['domestic_free_shipping_min_amount'],
+                    'domestic_shipping_single_item'                             => $postData['domestic_shipping_single_item'],
+                    'domestic_shipping_multiple_item'                           => $postData['domestic_shipping_multiple_item'],
+                    'international_shipping_single_item'                        => $postData['international_shipping_single_item'],
+                    'international_shipping_multiple_item'                      => $postData['international_shipping_multiple_item'],
+                ];
+                GeneralSetting::where('id', '=', 1)->update($fields);
+                return redirect()->back()->with('success_message', 'Tax & Shipping Settings Updated Successfully !!!');
             } else {
                 return redirect()->back()->with('error_message', 'All Fields Required !!!');
             }

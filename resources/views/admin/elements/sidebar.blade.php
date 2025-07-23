@@ -301,7 +301,7 @@ $orderCount7                   = Order::where('status', '=', 7)->where('is_cance
         <?php if(in_array(1, $module_id)){?>
           <li>
             <a class="<?=(($pageSegment == 'banner')?'active':'')?>" href="{{ url('admin/banner/list') }}">
-              <i class="bi bi-arrow-right"></i><span>Banners <small>(Section 1)</small></span>
+              <i class="bi bi-arrow-right"></i><span>Banners <small>(Section 1 & 2)</small></span>
             </a>
           </li>
         <?php }?>
@@ -309,14 +309,14 @@ $orderCount7                   = Order::where('status', '=', 7)->where('is_cance
         <?php if(in_array(2, $module_id)){?>
           <li>
             <a class="<?=(($pageSegment == 'home-page-section2')?'active':'')?>" href="{{ url('admin/home-page-section2/list') }}">
-              <i class="bi bi-arrow-right"></i><span>Home Page <small>(Section 2)</small></span>
+              <i class="bi bi-arrow-right"></i><span>Home Page <small>(Section 3 & 5)</small></span>
             </a>
           </li>
         <?php }?>
         <?php if(in_array(2, $module_id)){?>
           <li>
             <a class="<?=(($pageSegment == 'home-page-section346')?'active':'')?>" href="{{ url('admin/home-page-section346/list') }}">
-              <i class="bi bi-arrow-right"></i><span>Home Page <small>(Section 2-3-4-5-6)</small></span>
+              <i class="bi bi-arrow-right"></i><span>Home Page <small>(Section 4)</small></span>
             </a>
           </li>
         <?php }?>
@@ -327,14 +327,13 @@ $orderCount7                   = Order::where('status', '=', 7)->where('is_cance
             </a>
           </li>
         <?php }?> -->
-        <?php if(in_array(2, $module_id)){?>
+        <!-- <?php if(in_array(2, $module_id)){?>
           <li>
             <a class="<?=(($pageSegment == 'testimonial')?'active':'')?>" href="{{ url('admin/testimonial/list') }}">
               <i class="bi bi-arrow-right"></i><span>Testimonials <small>(Section 7)</small></span>
             </a>
           </li>
-        <?php }?>
-        
+        <?php }?> -->
       </ul>
     </li>
   <?php }?>

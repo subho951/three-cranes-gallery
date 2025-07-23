@@ -50,6 +50,7 @@ Route::get('/', function () {
                 Route::post('footer-settings', 'UserController@footer_settings');
                 Route::post('seo-settings', 'UserController@seo_settings');
                 Route::post('payment-settings', 'UserController@payment_settings');
+                Route::post('shipping-settings', 'UserController@shipping_settings');
           		Route::get('test-email', 'UserController@testEmail');
             /* setting */
             /* access & permission */

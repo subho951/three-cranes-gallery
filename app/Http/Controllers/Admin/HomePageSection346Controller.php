@@ -31,12 +31,12 @@ class HomePageSection346Controller extends Controller
             if($request->isMethod('post')){
                 $postData = $request->all();
                 $rules = [
-                    'sec2_title'                      => 'required',
-                    'sec3_title'                      => 'required',
+                    // 'sec2_title'                      => 'required',
+                    // 'sec3_title'                      => 'required',
                     'sec4_title'                      => 'required',
-                    'sec5_title'                      => 'required',
-                    'sec6_title'                      => 'required',
-                    'sec7_title'                      => 'required',
+                    // 'sec5_title'                      => 'required',
+                    // 'sec6_title'                      => 'required',
+                    // 'sec7_title'                      => 'required',
                 ];
                 if($this->validate($request, $rules)){
                     /* section 3 image */

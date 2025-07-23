@@ -83,6 +83,9 @@ $user_type = session('type');
             <!-- <li class="nav-item">
               <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab10">Color</button>
             </li> -->
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab11">Tax & Shipping</button>
+            </li>
             <?php }?>
           </ul>
           <div class="tab-content pt-2">
@@ -252,19 +255,6 @@ $user_type = session('type');
                   <label for="topbar_text" class="col-md-4 col-lg-3 col-form-label">Topbar Text</label>
                   <div class="col-md-8 col-lg-9">
                     <textarea name="topbar_text" class="form-control" id="topbar_text" rows="5"><?=$setting->topbar_text?></textarea>
-                  </div>
-                </div>
-
-                <div class="row mb-3">
-                  <label for="shipping_charge" class="col-md-4 col-lg-3 col-form-label">Shipping Charge</label>
-                  <div class="col-md-8 col-lg-9">
-                    <input name="shipping_charge" type="text" class="form-control" id="shipping_charge" value="<?=$setting->shipping_charge?>">
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label for="tax_percent" class="col-md-4 col-lg-3 col-form-label">Tax (%)</label>
-                  <div class="col-md-8 col-lg-9">
-                    <input name="tax_percent" type="text" class="form-control" id="tax_percent" value="<?=$setting->tax_percent?>">
                   </div>
                 </div>
 
@@ -731,6 +721,53 @@ $user_type = session('type');
                   <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
               </form><!-- End payment settings Form -->
+            </div>
+            <div class="tab-pane fade pt-3" id="tab11">
+              <!-- tax & shipping settings Form -->
+              <form method="POST" action="{{ url('admin/shipping-settings') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="row mb-3">
+                  <label for="tax_percent" class="col-md-5 col-lg-5 col-form-label">Tax (%)</label>
+                  <div class="col-md-7 col-lg-7">
+                    <input name="tax_percent" type="text" class="form-control" id="tax_percent" value="<?=$setting->tax_percent?>">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="domestic_free_shipping_min_amount" class="col-md-5 col-lg-5 col-form-label">Domestic Free Shipping Minimum Amount</label>
+                  <div class="col-md-7 col-lg-7">
+                    <input name="domestic_free_shipping_min_amount" type="text" class="form-control" id="domestic_free_shipping_min_amount" value="<?=$setting->domestic_free_shipping_min_amount?>">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="domestic_shipping_single_item" class="col-md-5 col-lg-5 col-form-label">Domestic Shipping Single Item (Per Item)</label>
+                  <div class="col-md-7 col-lg-7">
+                    <input name="domestic_shipping_single_item" type="text" class="form-control" id="domestic_shipping_single_item" value="<?=$setting->domestic_shipping_single_item?>">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="domestic_shipping_multiple_item" class="col-md-5 col-lg-5 col-form-label">Domestic Shipping Multiple Item (Per Item)</label>
+                  <div class="col-md-7 col-lg-7">
+                    <input name="domestic_shipping_multiple_item" type="text" class="form-control" id="domestic_shipping_multiple_item" value="<?=$setting->domestic_shipping_multiple_item?>">
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <label for="international_shipping_single_item" class="col-md-5 col-lg-5 col-form-label">International Shipping Single Item (Per Item)</label>
+                  <div class="col-md-7 col-lg-7">
+                    <input name="international_shipping_single_item" type="text" class="form-control" id="international_shipping_single_item" value="<?=$setting->international_shipping_single_item?>">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="international_shipping_multiple_item" class="col-md-5 col-lg-5 col-form-label">International Shipping Multiple Item (Per Item)</label>
+                  <div class="col-md-7 col-lg-7">
+                    <input name="international_shipping_multiple_item" type="text" class="form-control" id="international_shipping_multiple_item" value="<?=$setting->international_shipping_multiple_item?>">
+                  </div>
+                </div>
+                <div class="text-center">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+              </form><!-- End tax & shipping settings Form -->
             </div>
           </div><!-- End Bordered Tabs -->
         </div>

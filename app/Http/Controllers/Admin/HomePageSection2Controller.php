@@ -16,7 +16,7 @@ class HomePageSection2Controller extends Controller
     public function __construct()
     {        
         $this->data = array(
-            'title'             => 'Home Page Second Section',
+            'title'             => 'Home Page Third & Fifth Section',
             'controller'        => 'HomePageSection2Controller',
             'controller_route'  => 'home-page-section2',
             'primary_key'       => 'id',
@@ -41,6 +41,8 @@ class HomePageSection2Controller extends Controller
                 $rules = [
                     'name'                      => 'required',
                     'icon'                      => 'required',
+                    'section'                   => 'required',
+                    'size'                      => 'required',
                 ];
                 if($this->validate($request, $rules)){
                     /* hotel image */
@@ -58,10 +60,12 @@ class HomePageSection2Controller extends Controller
                         }
                     /* hotel image */
                     $fields = [
-                        'name'                  => strtoupper($postData['name']),
+                        'name'                  => $postData['name'],
                         'icon'                  => $icon,
                         'short_description'     => $postData['short_description'],
                         'section2_link'         => $postData['section2_link'],
+                        'section'               => $postData['section'],
+                        'size'                  => $postData['size'],
                     ];
                     HomePage2Section::insert($fields);
                     return redirect('admin/'.$this->data['controller_route'] . "/list")->with('success_message', $this->data['title'].' Inserted Successfully !!!');
@@ -87,6 +91,8 @@ class HomePageSection2Controller extends Controller
                 $postData = $request->all();
                 $rules = [
                     'name'                      => 'required',
+                    'section'                   => 'required',
+                    'size'                      => 'required',
                 ];
                 if($this->validate($request, $rules)){
                     /* hotel image */
@@ -104,10 +110,12 @@ class HomePageSection2Controller extends Controller
                         }
                     /* hotel image */
                     $fields = [
-                        'name'                  => strtoupper($postData['name']),
+                        'name'                  => $postData['name'],
                         'icon'                  => $icon,
                         'short_description'     => $postData['short_description'],
                         'section2_link'         => $postData['section2_link'],
+                        'section'               => $postData['section'],
+                        'size'                  => $postData['size'],
                     ];
                     HomePage2Section::where($this->data['primary_key'], '=', $id)->update($fields);
                     return redirect('admin/'.$this->data['controller_route'] . "/list")->with('success_message', $this->data['title'].' Updated Successfully !!!');

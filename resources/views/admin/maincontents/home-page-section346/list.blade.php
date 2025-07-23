@@ -71,7 +71,7 @@ $controllerRoute                = $module['controller_route'];
               <div class="row mb-3">
                 <label for="sec2_title" class="col-md-2 col-lg-2 col-form-label">Title</label>
                 <div class="col-md-10 col-lg-10">
-                  <textarea type="text" name="sec2_title" class="form-control" id="sec2_title" rows="5" required><?=$sec2_title?></textarea>
+                  <textarea type="text" name="sec2_title" class="form-control" id="sec2_title" rows="5"><?=$sec2_title?></textarea>
                 </div>
               </div>
               <div class="row mb-3">
@@ -87,7 +87,7 @@ $controllerRoute                = $module['controller_route'];
               <div class="row mb-3">
                 <label for="sec3_title" class="col-md-2 col-lg-2 col-form-label">Title</label>
                 <div class="col-md-10 col-lg-10">
-                  <textarea type="text" name="sec3_title" class="form-control" id="sec3_title" rows="5" required><?=$sec3_title?></textarea>
+                  <textarea type="text" name="sec3_title" class="form-control" id="sec3_title" rows="5"><?=$sec3_title?></textarea>
                 </div>
               </div>
               <div class="row mb-3">
@@ -131,7 +131,7 @@ $controllerRoute                = $module['controller_route'];
               <div class="row mb-3">
                 <label for="sec5_title" class="col-md-2 col-lg-2 col-form-label">Title</label>
                 <div class="col-md-10 col-lg-10">
-                  <textarea type="text" name="sec5_title" class="form-control" id="sec5_title" rows="5" required><?=$sec5_title?></textarea>
+                  <textarea type="text" name="sec5_title" class="form-control" id="sec5_title" rows="5"><?=$sec5_title?></textarea>
                 </div>
               </div>
               <div class="row mb-3">
@@ -147,7 +147,7 @@ $controllerRoute                = $module['controller_route'];
               <div class="row mb-3">
                 <label for="sec6_title" class="col-md-2 col-lg-2 col-form-label">Title</label>
                 <div class="col-md-10 col-lg-10">
-                  <textarea type="text" name="sec6_title" class="form-control" id="sec6_title" rows="5" required><?=$sec6_title?></textarea>
+                  <textarea type="text" name="sec6_title" class="form-control" id="sec6_title" rows="5"><?=$sec6_title?></textarea>
                 </div>
               </div>
               <div class="row mb-3">
@@ -163,7 +163,7 @@ $controllerRoute                = $module['controller_route'];
               <div class="row mb-3">
                 <label for="sec7_title" class="col-md-2 col-lg-2 col-form-label">Title</label>
                 <div class="col-md-10 col-lg-10">
-                  <textarea type="text" name="sec7_title" class="form-control" id="sec7_title" rows="5" required><?=$sec7_title?></textarea>
+                  <textarea type="text" name="sec7_title" class="form-control" id="sec7_title" rows="5"><?=$sec7_title?></textarea>
                 </div>
               </div>
               <div class="row mb-3">

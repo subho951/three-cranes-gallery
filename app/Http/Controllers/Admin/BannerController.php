@@ -38,9 +38,8 @@ class BannerController extends Controller
             if($request->isMethod('post')){
                 $postData = $request->all();
                 $rules = [
-                    'banner_text'             => 'required',
-                    'banner_text2'            => 'required',
-                    'banner_link'             => 'required',
+                    'section'                   => 'required',
+                    // 'banner_link'               => 'required',
                 ];
                 if($this->validate($request, $rules)){
                     /* banner image */
@@ -60,6 +59,7 @@ class BannerController extends Controller
                     $fields = [
                         // 'heading1'              => $postData['heading1'],
                         // 'heading2'              => $postData['heading2'],
+                        'section'               => $postData['section'],
                         'banner_text'           => $postData['banner_text'],
                         'banner_text2'          => $postData['banner_text2'],
                         'banner_link'           => $postData['banner_link'],
@@ -88,9 +88,8 @@ class BannerController extends Controller
             if($request->isMethod('post')){
                 $postData = $request->all();
                 $rules = [
-                    'banner_text'             => 'required',
-                    'banner_text2'            => 'required',
-                    'banner_link'             => 'required',
+                    'section'                   => 'required',
+                    // 'banner_link'               => 'required',
                 ];
                 if($this->validate($request, $rules)){
                     /* banner image */
@@ -110,6 +109,7 @@ class BannerController extends Controller
                     $fields = [
                         // 'heading1'              => $postData['heading1'],
                         // 'heading2'              => $postData['heading2'],
+                        'section'               => $postData['section'],
                         'banner_text'           => $postData['banner_text'],
                         'banner_text2'          => $postData['banner_text2'],
                         'banner_link'           => $postData['banner_link'],

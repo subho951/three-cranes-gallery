@@ -38,7 +38,7 @@ $controllerRoute = $module['controller_route'];
             <thead>
               <tr>
                 <th scope="col">#</th>
-                <!-- <th scope="col">Heading</th> -->
+                <th scope="col">Section</th>
                 <th scope="col">Banner Title Text</th>
                 <th scope="col">Banner Short Description Text</th>
                 <th scope="col">Banner Link</th>
@@ -50,13 +50,15 @@ $controllerRoute = $module['controller_route'];
               <?php if($rows){ $sl=1; foreach($rows as $row){?>
                 <tr>
                   <th scope="row"><?=$sl++?></th>
-                  <!-- <td><?=$row->heading1?><br><?=$row->heading2?></td> -->
+                  <td>Section <?=$row->section?></td>
                   <td><?=$row->banner_text?></td>
                   <td><?=wordwrap($row->banner_text2,35,"<br>\n")?></td>
-                  <td><a href="<?=$row->banner_link?>" target="_blank"><span class="badge bg-info"><i class="bi bi-link me-1"></i> Link</span></a></td>
+                  <td>
+                    <?php if($row->banner_link != ''){?><a href="<?=$row->banner_link?>" target="_blank"><span class="badge bg-info"><i class="bi bi-link me-1"></i> Link</span></a><?php }?>
+                  </td>
                   <td>
                     <?php if($row->banner_image != ''){?>
-                      <img src="<?=env('UPLOADS_URL').'banner/'.$row->banner_image?>" class="img-thumbnail" alt="<?=$row->banner_text?>" style="width: 150px; height: 150px; margin-top: 10px;">
+                      <img src="<?=env('UPLOADS_URL').'banner/'.$row->banner_image?>" class="img-thumbnail" alt="<?=$row->banner_text?>" style="width: 250px; height: 120px; margin-top: 10px;">
                     <?php } else {?>
                       <img src="<?=env('NO_IMAGE')?>" alt="<?=$row->banner_text?>" class="img-thumbnail" style="width: 150px; height: 150px; margin-top: 10px;">
                     <?php }?>

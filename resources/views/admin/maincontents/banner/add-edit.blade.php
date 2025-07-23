@@ -30,15 +30,13 @@ $controllerRoute = $module['controller_route'];
     </div>
     <?php
     if($row){
-      $heading1       = $row->heading1;
-      $heading2       = $row->heading2;
+      $section        = $row->section;
       $banner_text    = $row->banner_text;
       $banner_text2   = $row->banner_text2;
       $banner_link    = $row->banner_link;
       $banner_image   = $row->banner_image;
     } else {
-      $heading1       = '';
-      $heading2       = '';
+      $section        = '';
       $banner_text    = '';
       $banner_text2   = '';
       $banner_link    = '';
@@ -50,43 +48,41 @@ $controllerRoute = $module['controller_route'];
         <div class="card-body pt-3">
           <form method="POST" action="" enctype="multipart/form-data">
             @csrf
-            <!-- <div class="row mb-3">
-              <label for="heading1" class="col-md-2 col-lg-2 col-form-label">Banner Heading 1</label>
+            <div class="row mb-3">
+              <label for="section" class="col-md-2 col-lg-2 col-form-label">Section</label>
               <div class="col-md-10 col-lg-10">
-                <input type="text" name="heading1" class="form-control" id="heading1" value="<?=$heading1?>">
+                <select name="section" class="form-control" id="section" required>
+                  <option value="" selected>Select Section</option>
+                  <option value="1" <?=(($section == 1)?'selected':'')?>>Section 1</option>
+                  <option value="2" <?=(($section == 2)?'selected':'')?>>Section 2</option>
+                </select>
               </div>
             </div>
             <div class="row mb-3">
-              <label for="heading2" class="col-md-2 col-lg-2 col-form-label">Banner Heading 2</label>
-              <div class="col-md-10 col-lg-10">
-                <input type="text" name="heading2" class="form-control" id="heading2" value="<?=$heading2?>">
-              </div>
-            </div> -->
-            <div class="row mb-3">
               <label for="banner_text" class="col-md-2 col-lg-2 col-form-label">Banner Title Text</label>
               <div class="col-md-10 col-lg-10">
-                <input type="text" name="banner_text" class="form-control" id="banner_text" value="<?=$banner_text?>" required>
+                <input type="text" name="banner_text" class="form-control" id="banner_text" value="<?=$banner_text?>">
               </div>
             </div>
             <div class="row mb-3">
               <label for="banner_text2" class="col-md-2 col-lg-2 col-form-label">Banner Short Description Text</label>
               <div class="col-md-10 col-lg-10">
-                <input type="text" name="banner_text2" class="form-control" id="banner_text2" value="<?=$banner_text2?>" required>
+                <input type="text" name="banner_text2" class="form-control" id="banner_text2" value="<?=$banner_text2?>">
               </div>
             </div>
             <div class="row mb-3">
               <label for="banner_link" class="col-md-2 col-lg-2 col-form-label">Banner Link</label>
               <div class="col-md-10 col-lg-10">
-                <input type="text" name="banner_link" class="form-control" id="banner_link" value="<?=$banner_link?>" required>
+                <input type="text" name="banner_link" class="form-control" id="banner_link" value="<?=$banner_link?>">
               </div>
             </div>
             <div class="row mb-3">
               <label for="banner_image" class="col-md-2 col-lg-2 col-form-label">Banner Image</label>
               <div class="col-md-10 col-lg-10">
-                <input type="file" name="banner_image" class="form-control" id="banner_image">
+                <input type="file" name="banner_image" class="form-control" id="banner_image" <?=((!empty($row))?'':'required')?>>
                 <small class="text-info">* Only JPG, JPEG, ICO, SVG, PNG files are allowed</small><br>
                 <?php if($banner_image != ''){?>
-                  <img src="<?=env('UPLOADS_URL').'banner/'.$banner_image?>" class="img-thumbnail" alt="<?=$banner_text?>" style="width: 150px; height: 150px; margin-top: 10px;">
+                  <img src="<?=env('UPLOADS_URL').'banner/'.$banner_image?>" class="img-thumbnail" alt="<?=$banner_text?>" style="width: 250px; height: 120px; margin-top: 10px;">
                 <?php } else {?>
                   <img src="<?=env('NO_IMAGE')?>" alt="<?=$banner_text?>" class="img-thumbnail" style="width: 150px; height: 150px; margin-top: 10px;">
                 <?php }?>                
