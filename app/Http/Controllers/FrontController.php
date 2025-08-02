@@ -57,30 +57,36 @@ class FrontController extends Controller
         }
     /* home */
     /* category */
-        public function category($slug, $id){
-            $id                             = Helper::decoded($id);
-            $data['getCategory']            = Category::where('id', '=', $id)->first();
-            $data['getSubCategory']         = Category::where('parent_id', '=', $id)->where('status', '=', 1)->get();
-            $data['getOtherCategory']       = Category::where('parent_id', '=', 0)->where('status', '=', 1)->where('id', '!=', $id)->get();
+        public function category($slug){
+            $data['getCategory']            = Category::where('slug', '=', $slug)->first();
+            $parent_id                      = (($data['getCategory'])?$data['getCategory']->id:0);
+            $data['subcategory']            = Category::where('parent_id', '=', $parent_id)->get();
+            $data['products']               = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->where('status', '=', 1)->where('main_category', '=', $parent_id)->orderBy('id', 'DESC')->get();
+
             $title                          = (($data['getCategory'])?$data['getCategory']->category_name:"Parent Category");
             $page_name                      = 'category';
             echo $this->front_before_login_layout($title,$page_name,$data);
         }
     /* category */
     /* sub category */
-        public function subcategory(Request $request, $slug, $id){
-            $id                             = Helper::decoded($id);
-            $data['slug']                   = $slug;
-            $data['id']                     = $id;
-            $data['getCategory']            = Category::where('id', '=', $id)->first();
-            $data['getProducts']            = Product::select('id', 'name', 'slug', 'cover_image', 'short_description', 'base_price')->where('status', '=', 1)->where('sub_category', '=', $id)->orderBy('id', 'DESC')->get();
+        public function subcategory(Request $request, $slug1, $slug2){
+            $data['slug1']                   = $slug1;
+            $data['slug2']                   = $slug2;
+            $data['getCategory']            = Category::where('slug', '=', $slug1)->first();
+            $parent_id                      = (($data['getCategory'])?$data['getCategory']->id:0);
+
+            $data['subcategory']            = Category::where('slug', '=', $slug2)->first();
+            $child_id                      = (($data['subcategory'])?$data['subcategory']->id:0);
+
+            $data['products']               = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->where('status', '=', 1)->where('main_category', '=', $parent_id)->where('sub_category', '=', $child_id)->orderBy('id', 'DESC')->get();
             
-            $data['parent_id']              = $data['getCategory']->parent_id;
-            $data['child_id']               = $data['getCategory']->id;
-            $data['minPrice']               = Product::where('status', '=', 1)->where('sub_category', '=', $id)->min('base_price');
-            $data['maxPrice']               = Product::where('status', '=', 1)->where('sub_category', '=', $id)->max('base_price');
+            $data['parent_id']              = $parent_id;
+            $data['child_id']               = $child_id;
+            $data['minPrice']               = Product::where('status', '=', 1)->where('sub_category', '=', $child_id)->min('discounted_price');
+            $data['maxPrice']               = Product::where('status', '=', 1)->where('sub_category', '=', $child_id)->max('discounted_price');
             $data['filter_by']              = '';
             $data['category_filter']        = [];
+            
             if($request->isMethod('post')){
                 $postData       = $request->all();
                 // Helper::pr($postData);
