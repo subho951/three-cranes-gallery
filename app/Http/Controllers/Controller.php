@@ -224,7 +224,6 @@ class Controller extends BaseController
         $data['page_header']        = $title;
         $user_id                    = session('user_id');
         $data['user']               = User::find($user_id);
-        $data['content']            = HomePage::where('status', '=', 1)->first();
         $data['parentCats']         = Category::select('id', 'category_name', 'slug')->where('status', '=', 1)->where('parent_id', '=', 0)->get();
         $data['head']               = view('front.elements.head', $data);
         $data['header']             = view('front.elements.header', $data);

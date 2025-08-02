@@ -460,7 +460,7 @@ $user_type = session('type');
                 <div class="row mb-3">
                   <label for="footer_text" class="col-md-4 col-lg-3 col-form-label">Footer Text</label>
                   <div class="col-md-8 col-lg-9">
-                    <textarea type="text" name="footer_text" class="form-control" id="ckeditor6" rows="5"><?=$setting->footer_text?></textarea>
+                    <textarea type="text" name="footer_text" class="form-control" id="footer_text" rows="5"><?=$setting->footer_text?></textarea>
                   </div>
                 </div>
 
@@ -508,7 +508,7 @@ $user_type = session('type');
                   </div>
                 </div>
 
-                <label for="" class="col-md-4 col-lg-3 col-form-label"><b>Help</b></label>
+                <label for="" class="col-md-4 col-lg-3 col-form-label"><b>About</b></label>
                 <div class="field_wrapper2" style="border: 1px solid #dfcdaf; border-radius: 5px; padding: 10px;margin-bottom: 10px;">
                   <?php
                   $footer_link_name2 = (($setting->footer_link_name2 != '')?json_decode($setting->footer_link_name2):[]);
@@ -552,7 +552,7 @@ $user_type = session('type');
                   </div>
                 </div>
 
-                <label for="" class="col-md-4 col-lg-3 col-form-label"><b>Support</b></label>
+                <label for="" class="col-md-4 col-lg-3 col-form-label"><b>Help & Support</b></label>
                 <div class="field_wrapper3" style="border: 1px solid #dfcdaf; border-radius: 5px; padding: 10px;margin-bottom: 10px;">
                   <?php
                   $footer_link_name3 = (($setting->footer_link_name3 != '')?json_decode($setting->footer_link_name3):[]);

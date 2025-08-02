@@ -43,60 +43,14 @@ class FrontController extends Controller
 {
     /* home */
         public function home(){
-            echo '<h1 style="text-align:center;">Website is under construction. Please stay tuned !!!</h1>';die;
-            $data['banners']                = Banner::where('status', '=', 1)->orderBy('id', 'ASC')->get();
-            $data['categories']             = Category::where('status', '=', 1)->where('parent_id', '=', 0)->orderBy('id', 'ASC')->get();
-            $data['content']                = HomePage::where('status', '=', 1)->first();
-            $data['section2']               = HomePage2Section::where('status', '=', 1)->orderBy('id', 'ASC')->get();
-            /* best sellers */
-                $sqlQuery = "SELECT product_id,COUNT(*) AS product_count FROM order_details WHERE order_id>0 AND is_cart=0 GROUP BY product_id ORDER BY product_count DESC LIMIT 8";
-                $getProductIds = DB::select($sqlQuery);
-                $bestSellers = [];
-                if($getProductIds){
-                    foreach($getProductIds as $getProductId){
-                        $getProduct     = Product::where('id', '=', $getProductId->product_id)->first();
-                        $reviewCount    = UserReview::where('product_id', '=', $getProductId->product_id)->where('status', '=', 1)->count();
-                        $reviewSum      = UserReview::where('product_id', '=', $getProductId->product_id)->where('status', '=', 1)->sum('rating');
-                        $avgRating      = (($reviewCount > 0)?($reviewSum / $reviewCount):0);
-                        $bestSellers[]  = [
-                            'id'            => $getProductId->product_id,
-                            'name'          => (($getProduct)?$getProduct->name:''),
-                            'base_price'    => (($getProduct)?$getProduct->base_price:''),
-                            'markup_price'  => (($getProduct)?$getProduct->markup_price:''),
-                            'short_description'  => (($getProduct)?$getProduct->short_description:''),
-                            'cover_image'   => (($getProduct)?env('UPLOADS_URL').'product/'.$getProduct->cover_image:''),
-                            'review_count'  => $reviewCount,
-                            'avg_rating'    => $avgRating,
-                        ];
-                    }
-                }
-                $data['best_sellers']           = $bestSellers;
-            /* best sellers */
-            /* latest products */
-                $sqlQuery               = "SELECT id FROM products WHERE status = 1 AND is_feature = 1 ORDER BY id DESC LIMIT 8";
-                $getSimilarProductIds   = DB::select($sqlQuery);
-                $latest_products = [];
-                if($getSimilarProductIds){
-                    foreach($getSimilarProductIds as $getProductId){
-                        $getProduct     = Product::where('id', '=', $getProductId->id)->first();
-                        $reviewCount    = UserReview::where('product_id', '=', $getProductId->id)->where('status', '=', 1)->count();
-                        $reviewSum      = UserReview::where('product_id', '=', $getProductId->id)->where('status', '=', 1)->sum('rating');
-                        $avgRating      = (($reviewCount > 0)?($reviewSum / $reviewCount):0);
-                        $latest_products[]  = [
-                            'id'            => $getProductId->id,
-                            'name'          => (($getProduct)?$getProduct->name:''),
-                            'base_price'    => (($getProduct)?$getProduct->base_price:''),
-                            'markup_price'  => (($getProduct)?$getProduct->markup_price:''),
-                            'short_description'  => (($getProduct)?$getProduct->short_description:''),
-                            'cover_image'   => (($getProduct)?env('UPLOADS_URL').'product/'.$getProduct->cover_image:''),
-                            'review_count'  => $reviewCount,
-                            'avg_rating'    => $avgRating,
-                        ];
-                    }
-                }
-                $data['latest_products']       = $latest_products;
-            /* latest products */
-            $data['testimonials']           = Testimonial::where('status', '=', 1)->orderBy('id', 'DESC')->get();
+            $data['banners1']                   = Banner::where('status', '=', 1)->where('section', '=', 1)->orderBy('id', 'DESC')->get();
+            $data['banners2']                   = Banner::where('status', '=', 1)->where('section', '=', 2)->orderBy('id', 'DESC')->get();
+            $data['sections2']                  = HomePage2Section::where('status', '=', 1)->where('section', '=', 3)->orderBy('id', 'ASC')->get();
+            $data['home_page']                  = HomePage::where('status', '=', 1)->where('id', '=', 1)->first();
+            $data['products']                   = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->where('status', '=', 1)->orderBy('id', 'DESC')->limit(5)->get();
+            $data['sections5']                  = HomePage2Section::where('status', '=', 1)->where('section', '=', 5)->orderBy('id', 'ASC')->get();
+            // Helper::pr($data['sections5']);
+            
             $title                          = 'Home';
             $page_name                      = 'home';
             echo $this->front_before_login_layout($title,$page_name,$data);

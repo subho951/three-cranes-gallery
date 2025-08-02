@@ -12,13 +12,16 @@ use App\Http\Controllers\PayPalController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 /* Front Panel */
     // before login
-        // Route::match(['get', 'post'], '/', 'App\Http\Controllers\FrontController@home');
+        Route::match(['get', 'post'], '/', 'App\Http\Controllers\FrontController@home');
     // before login
+    // after login
+
+    // after login
 /* Front Panel */
 /* Admin Panel */
     Route::prefix('/admin')->namespace('App\Http\Controllers\Admin')->group(function(){
