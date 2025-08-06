@@ -19,6 +19,7 @@
     <script src="<?=env('FRONT_ASSETS_URL')?>js/jquery.min.js"></script>
     <script src="<?=env('FRONT_ASSETS_URL')?>js/bootstrap.bundle.min.js"></script>
     <script src="<?=env('FRONT_ASSETS_URL')?>js/slick.min.js"></script>
+    <script src="<?=env('FRONT_ASSETS_URL')?>js/swiper-bundle.min.js"></script>
     <script src="<?=env('FRONT_ASSETS_URL')?>js/main.js"></script>
   </body>
 </html>

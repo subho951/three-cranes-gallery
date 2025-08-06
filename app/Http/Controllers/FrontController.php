@@ -164,15 +164,16 @@ class FrontController extends Controller
         }
     /* sub category */
     /* product details */
-        public function productDetails(Request $request, $id){
-            $id                             = Helper::decoded($id);
-            $data['product_id']             = $id;
-            $data['product']                = Product::where('status', '=', 1)->where('id', '=', $id)->first();
+        public function productDetails(Request $request, $slug){
+            $data['slug']                   = $slug;
+            $data['product']                = Product::where('slug', '=', $slug)->first();
+            $id                             = (($data['product'])?$data['product']->id:'');
             $data['product_images']         = ProductImage::select('image')->where('status', '=', 1)->where('product_id', '=', $id)->get();
-            $data['attrs']                  = Attribute::select('id', 'name', 'is_price_effect')->where('sub_category_id', '=', $data['product']->sub_category)->where('status', '=', 1)->get();
+            
             $data['reviewCount']            = UserReview::where('product_id', '=', $id)->where('status', '=', 1)->count();
             $data['reviewSum']              = UserReview::where('product_id', '=', $id)->where('status', '=', 1)->sum('rating');
             $data['avgRating']              = (($data['reviewCount'] > 0)?($data['reviewSum'] / $data['reviewCount']):0);
+            
             if($request->isMethod('post')){
                 $postData       = $request->all();
                 $fields         = [
@@ -211,34 +212,10 @@ class FrontController extends Controller
                 $currentUrl = url('product-details/'.Helper::encoded($postData['product_id']));
                 return redirect($currentUrl)->with('success_message', 'Product Review Submitted Successfully. Wait For Admin Approval !!!');
             }
-            /* best sellers */
-                $sqlQuery = "SELECT product_id,COUNT(*) AS product_count FROM order_details WHERE order_id>0 AND is_cart=0 GROUP BY product_id ORDER BY product_count DESC LIMIT 4";
-                $getProductIds = DB::select($sqlQuery);
-                $bestSellers = [];
-                if($getProductIds){
-                    foreach($getProductIds as $getProductId){
-                        $getProduct     = Product::where('id', '=', $getProductId->product_id)->first();
-                        $reviewCount    = UserReview::where('product_id', '=', $getProductId->product_id)->where('status', '=', 1)->count();
-                        $reviewSum      = UserReview::where('product_id', '=', $getProductId->product_id)->where('status', '=', 1)->sum('rating');
-                        $avgRating      = (($reviewCount > 0)?($reviewSum / $reviewCount):0);
-                        $bestSellers[]  = [
-                            'id'            => $getProductId->product_id,
-                            'name'          => (($getProduct)?$getProduct->name:''),
-                            'base_price'    => (($getProduct)?$getProduct->base_price:''),
-                            'markup_price'  => (($getProduct)?$getProduct->markup_price:''),
-                            'short_description'  => (($getProduct)?$getProduct->short_description:''),
-                            'cover_image'   => (($getProduct)?env('UPLOADS_URL').'product/'.$getProduct->cover_image:''),
-                            'review_count'  => $reviewCount,
-                            'avg_rating'    => $avgRating,
-                        ];
-                    }
-                }
-                // Helper::pr($bestSellers);
-                $data['best_sellers']           = $bestSellers;
-            /* best sellers */
+            
             /* similar products */
-                $sub_category           = $data['product']->sub_category;
-                $sqlQuery               = "SELECT id FROM products WHERE id!=$id AND sub_category = '$sub_category' ORDER BY rand() LIMIT 4";
+                $sub_category           = (($data['product'])?$data['product']->sub_category:'');
+                $sqlQuery               = "SELECT id FROM products WHERE id!=$id AND sub_category = '$sub_category' ORDER BY rand() LIMIT 5";
                 $getSimilarProductIds   = DB::select($sqlQuery);
                 $similarProducts = [];
                 if($getSimilarProductIds){
@@ -249,11 +226,12 @@ class FrontController extends Controller
                         $avgRating      = (($reviewCount > 0)?($reviewSum / $reviewCount):0);
                         $similarProducts[]  = [
                             'id'            => $getProductId->id,
+                            'slug'          => (($getProduct)?$getProduct->slug:''),
                             'name'          => (($getProduct)?$getProduct->name:''),
-                            'base_price'    => (($getProduct)?$getProduct->base_price:''),
-                            'markup_price'  => (($getProduct)?$getProduct->markup_price:''),
-                            'short_description'  => (($getProduct)?$getProduct->short_description:''),
-                            'cover_image'   => (($getProduct)?env('UPLOADS_URL').'product/'.$getProduct->cover_image:''),
+                            'discounted_price'    => (($getProduct)?$getProduct->discounted_price:''),
+                            // 'markup_price'  => (($getProduct)?$getProduct->markup_price:''),
+                            // 'short_description'  => (($getProduct)?$getProduct->short_description:''),
+                            'cover_image'   => (($getProduct)?$getProduct->cover_image:''),
                             'review_count'  => $reviewCount,
                             'avg_rating'    => $avgRating,
                         ];
@@ -261,6 +239,7 @@ class FrontController extends Controller
                 }
                 $data['similar_products']       = $similarProducts;
             /* similar products */
+            // Helper::pr($data['similar_products']);
             $title                          = 'Product Details';
             $page_name                      = 'product-details';
             echo $this->front_before_login_layout($title,$page_name,$data);

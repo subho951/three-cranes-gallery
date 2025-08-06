@@ -8,5 +8,6 @@
 <link rel="stylesheet" href="<?=env('FRONT_ASSETS_URL')?>css/slick.css">
 <link rel="stylesheet" href="<?=env('FRONT_ASSETS_URL')?>css/slick-theme.css">
 <link rel="stylesheet" href="<?=env('FRONT_ASSETS_URL')?>css/fontawesome-all.min.css">
+<link rel="stylesheet" href="<?=env('FRONT_ASSETS_URL')?>css/swiper-bundle.min.css">
 <link rel="stylesheet" href="<?=env('FRONT_ASSETS_URL')?>css/style.css">
 <link rel="stylesheet" href="<?=env('FRONT_ASSETS_URL')?>css/responsive.css">
