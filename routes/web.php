@@ -39,8 +39,33 @@ use App\Http\Controllers\PayPalController;
         Route::match(['get', 'post'], '/contact', 'App\Http\Controllers\FrontController@home');
         Route::match(['get', 'post'], '/faq', 'App\Http\Controllers\FrontController@home');
     // before login
+    // authentication
+        Route::match(['get', 'post'], '/login', 'App\Http\Controllers\FrontController@signin');
+        Route::match(['get', 'post'], 'signup', 'App\Http\Controllers\FrontController@signup');
+        Route::match(['get', 'post'], 'signup-validate-otp/{id}', 'App\Http\Controllers\FrontController@signupValidateOTP');
+        Route::match(['get', 'post'], 'signin', 'App\Http\Controllers\FrontController@signin');
+        Route::match(['get', 'post'], 'signin/{id}', 'App\Http\Controllers\FrontController@signin');
+        Route::match(['get', 'post'], 'signout', 'App\Http\Controllers\FrontController@signout');
+        Route::match(['get', 'post'], 'forgot-password', 'App\Http\Controllers\FrontController@forgotPassword');
+        Route::match(['get', 'post'], 'validate-otp/{id}', 'App\Http\Controllers\FrontController@validateOTP');
+        Route::match(['get', 'post'], 'reset-password/{id}', 'App\Http\Controllers\FrontController@resetPassword');
+    // authentication
     // after login
-
+        Route::group(['prefix' => 'user', 'middleware' => ['user']], function () {
+            Route::match(['get','post'], '/dashboard', 'App\Http\Controllers\FrontController@dashboard');
+            Route::match(['get','post'], '/account', 'App\Http\Controllers\FrontController@account');
+            Route::match(['get','post'], '/change-password', 'App\Http\Controllers\FrontController@changePassword');
+            Route::match(['get','post'], '/addresses/{id}', 'App\Http\Controllers\FrontController@addresses');
+            Route::match(['get', 'post'], '/addresses-delete/{id}', 'App\Http\Controllers\FrontController@addressesDelete');
+            Route::match(['get','post'], '/order-list', 'App\Http\Controllers\FrontController@orderList');
+            Route::match(['get','post'], '/order-details/{id}', 'App\Http\Controllers\FrontController@orderDetails');
+            Route::match(['get','post'], '/cancel-order/{id}/{id1}', 'App\Http\Controllers\FrontController@cancelOrder');
+            Route::match(['get','post'], '/print-invoice/{id}', 'App\Http\Controllers\FrontController@printInvoice');
+            Route::match(['get','post'], '/wishlist', 'App\Http\Controllers\FrontController@wishlist');
+            Route::match(['get','post'], '/wishlist-product-delete/{id}', 'App\Http\Controllers\FrontController@wishlistProductDelete');
+            Route::match(['get','post'], '/reviews', 'App\Http\Controllers\FrontController@reviews');
+            Route::get('/signout', 'App\Http\Controllers\FrontController@signout');
+        });
     // after login
 /* Front Panel */
 /* Admin Panel */

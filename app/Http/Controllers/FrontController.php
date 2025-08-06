@@ -1169,7 +1169,7 @@ class FrontController extends Controller
                                     'password'          => Hash::make($request->password),
                                     'remember_token'    => $remember_token,
                                 ];
-                                // Helper::pr($fields);
+                                // Helper::pr($fields,0);
                                 /* email sent */
                                     $generalSetting              = GeneralSetting::find('1');
                                     $message                     = str_replace("{{otp1}}", substr($remember_token, 0, 1), $generalSetting->email_template_forgot_password);
@@ -1177,7 +1177,7 @@ class FrontController extends Controller
                                     $message2                    = str_replace("{{otp3}}", substr($remember_token, 2, 1), $message1);
                                     $message3                    = str_replace("{{otp4}}", substr($remember_token, 3, 1), $message2);
                                     $subject                     = $generalSetting->site_name.' :: Verify Signup OTP';
-                                    $this->sendMail($email, $subject, $message3);
+                                    // $this->sendMail($email, $subject, $message3);
                                 /* email sent */
                                 /* email log save */
                                     $postData2 = [
@@ -1199,10 +1199,6 @@ class FrontController extends Controller
                     } else {
                         return redirect()->back()->with('error_message', 'Email Already Exists. Try With Different Email !!!');
                     }
-                    
-                // } else {
-                //     return redirect()->back()->with('error_message', 'All Fields Required !!!');
-                // }
             }
         }
         public function signupValidateOTP(Request $request, $id){
@@ -1272,7 +1268,7 @@ class FrontController extends Controller
                             $message2                    = str_replace("{{otp3}}", substr($remember_token, 2, 1), $message1);
                             $message3                    = str_replace("{{otp4}}", substr($remember_token, 3, 1), $message2);
                             $subject                     = $generalSetting->site_name.' :: Forgot Password OTP';
-                            $this->sendMail($checkUser->email, $subject, $message3);
+                            // $this->sendMail($checkUser->email, $subject, $message3);
                         /* email sent */
                         /* email log save */
                             $postData2 = [
@@ -1360,7 +1356,7 @@ class FrontController extends Controller
                                 $message                     = str_replace("{{name}}", $checkUser->first_name.' '.$checkUser->last_name, $generalSetting->email_template_change_password);
                                 $message1                    = str_replace("{{email}}", $checkUser->email, $message);
                                 $subject                     = $generalSetting->site_name.' :: Reset Password';
-                                $this->sendMail($checkUser->email, $subject, $message1);
+                                // $this->sendMail($checkUser->email, $subject, $message1);
                             /* email sent */
                             /* email log save */
                                 $postData2 = [

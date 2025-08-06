@@ -28,7 +28,7 @@ use App\Models\Product;
                         <ul>
                             <li> <i class="fa-solid fa-earth-americas"></i></li>
                             <li class="nav-item dropdown">
-                                <a class="nav-link p-0" href="#">
+                                <a class="nav-link p-0" href="javascript:void(0);">
                                     IN ($)
                                 </a>
                                 <!-- <a class="nav-link dropdown-toggle p-0" href="#" id="navbarDropdown" role="button"
@@ -41,8 +41,13 @@ use App\Models\Product;
                               </ul> -->
                             </li>
                         </ul>
-
-                        <li><i class="fa-solid fa-circle-user"></i>Account</li>
+                        <li>
+                            <?php if(session('user_id')) {?>
+                                <a class="nav-link p-0" href="<?= url('user/dashboard') ?>"><i class="fa-solid fa-circle-user"></i>Welcome <?=session('name')?></a>
+                            <?php } else {?>
+                                <a class="nav-link p-0" href="<?= url('login') ?>"><i class="fa-solid fa-circle-user"></i>Signup/Signin</a>
+                            <?php }?>
+                        </li>
                     </ul>
                 </div>
             </div>
