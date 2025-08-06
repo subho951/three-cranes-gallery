@@ -1387,7 +1387,10 @@ class FrontController extends Controller
     /* forgot password */
     /* dashboard */
         public function dashboard(Request $request){
-            $data                           = [];
+            $user_id                        = session('user_id');
+            $data['wishlist_count']         = UserWishlist::where('user_id', '=', $user_id)->count();
+            $data['order_count']            = Order::where('cust_id', '=', $user_id)->count();
+            $data['orderList']              = Order::where('cust_id', '=', $user_id)->orderBy('id', 'DESC')->limit(5)->get();
             $title                          = 'Dashboard';
             $page_name                      = 'dashboard';
             echo $this->front_after_login_layout($title,$page_name,$data);
@@ -1454,7 +1457,7 @@ class FrontController extends Controller
                 }
             }
             $title                          = 'Account Details';
-            $page_name                      = 'myaccount';
+            $page_name                      = 'account';
             echo $this->front_after_login_layout($title,$page_name,$data);
         }
     /* Update profile */

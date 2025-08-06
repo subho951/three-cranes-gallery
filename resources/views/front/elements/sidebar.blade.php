@@ -71,7 +71,7 @@ if(count($pageName) < 4){
                 </a>
             </li>
             <li class="">
-                <a href="<?=url('user/addresses/'.Helper::encoded($currentUrl))?>" <?=(($pageSegment == 'addresses')?'class="active"':'')?>>
+                <a href="<?=url('user/addresses/')?>" <?=(($pageSegment == 'addresses')?'class="active"':'')?>>
                     Address 
                     <svg aria-hidden="true"
                         focusable="false" data-prefix="fas" data-icon="house"

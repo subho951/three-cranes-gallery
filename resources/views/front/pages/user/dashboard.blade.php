@@ -1,3 +1,6 @@
+<?php
+use App\Helpers\Helper;
+?>
 <div class="card mb-5 p-3">
     <b>Welcome <?=session('name')?> !</b>
     <div class="row mt-3 mb-3">
@@ -8,7 +11,7 @@
                         <p>Total Orders</p>
                     </div>
                     <div class="card-body">
-                        <p>2</p>
+                        <p><?=$order_count?></p>
                     </div>
                 </div>
             </a>
@@ -20,37 +23,35 @@
                         <p>Total Wishlist</p>
                     </div>
                     <div class="card-body">
-                        <p>1</p>
+                        <p><?=$wishlist_count?></p>
                     </div>
                 </div>
             </a>
         </div>
     </div>
-    <h5 class="recent">Recent Order</h5>
-    <div class="table-responsive custom-table">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Order No</th>
-                    <th>Price</th>
-                    <th>Order Date</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>TCG-0000038</td>
-                    <td>$ 76.32</td>
-                    <td>Apr 22, 2025</td>
-                    <td><a href="/account/myorder/38"><u>Details</u></a></td>
-                </tr>
-                <tr>
-                    <td>TCG-0000037</td>
-                    <td>$ 15.90</td>
-                    <td>Apr 21, 2025</td>
-                    <td><a href="/account/myorder/37"><u>Details</u></a></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <?php if(count($orderList) > 0){?>
+        <h5 class="recent">Recent Order</h5>
+        <div class="table-responsive custom-table">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Order No</th>
+                        <th>Price</th>
+                        <th>Order Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($orderList as $orderRow){?>
+                        <tr>
+                            <td><?=$orderRow->order_no?></td>
+                            <td>$ <?=number_format($orderRow->net_amt,2)?></td>
+                            <td><?=date_format(date_create($orderRow->created_at), "M d, Y h:i A")?></td>
+                            <td><a href="<?=url('user/order-details/' . Helper::encoded($orderRow->id))?>"><u>Details</u></a></td>
+                        </tr>
+                    <?php }?>
+                </tbody>
+            </table>
+        </div>
+    <?php }?>
 </div>

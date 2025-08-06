@@ -18,7 +18,7 @@ use App\Models\Product;
         <div class="row">
             <div class="col-lg-4 col-md-4 col-sm-4">
                 <div class="header_sign_content mb-3 mb-sm-0">
-                    <a href="">Sign Up for Email</a>
+                    <!-- <a href="">Sign Up for Email</a> -->
                 </div>
             </div>
             <div class="col-lg-8 col-md-8 col-sm-8">
@@ -29,7 +29,7 @@ use App\Models\Product;
                             <li> <i class="fa-solid fa-earth-americas"></i></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link p-0" href="javascript:void(0);">
-                                    IN ($)
+                                    US ($)
                                 </a>
                                 <!-- <a class="nav-link dropdown-toggle p-0" href="#" id="navbarDropdown" role="button"
                                   aria-expanded="false">
@@ -74,8 +74,10 @@ use App\Models\Product;
                         <button><img src="<?= env('FRONT_ASSETS_URL') ?>images/search_icon.png" alt="logo"></button>
                     </div>
                     <ul>
-                        <li><a href="#"> <img src="<?= env('FRONT_ASSETS_URL') ?>images/heart_icon.png" alt="logo"></a></li>
-                        <li><a href="#"> <img src="<?= env('FRONT_ASSETS_URL') ?>images/cart_icon.png" alt="logo"></a></li>
+                        <?php if(session('user_id')) {?>
+                            <li><a href="<?=url('user/wishlist')?>"> <img src="<?= env('FRONT_ASSETS_URL') ?>images/heart_icon.png" alt="logo"></a></li>
+                        <?php }?>
+                        <li><a href="<?=url('cart')?>"> <img src="<?= env('FRONT_ASSETS_URL') ?>images/cart_icon.png" alt="logo"></a></li>
                     </ul>
                 </div>
             </div>
@@ -139,6 +141,10 @@ use App\Models\Product;
 
                                 <li class="nav-item">
                                     <a class="nav-link" href="<?= url('specials') ?>" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Specials</a>
+                                </li>
+                                
+                                <li class="nav-item">
+                                    <a class="nav-link" href="<?= url('faq') ?>" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false"> FAQs</a>
                                 </li>
 
                                 <li class="nav-item">
