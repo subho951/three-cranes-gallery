@@ -72,7 +72,7 @@ $current_url = url()->current();
             <div class="row mb-3">
               <label for="long_description" class="col-md-2 col-lg-2 col-form-label">Description</label>
               <div class="col-md-10 col-lg-10">
-                <textarea type="text" name="long_description" class="form-control" id="ckeditor2" rows="5" required><?=$long_description?></textarea>
+                <textarea type="text" name="long_description" class="form-control" id="ckeditor2" rows="5"><?=$long_description?></textarea>
               </div>
             </div>
             <!-- <div class="row mb-3">

@@ -35,9 +35,10 @@ use App\Http\Controllers\PayPalController;
         Route::match(['get', 'post'], 'order-success/{id1}', 'App\Http\Controllers\FrontController@orderSuccess');
         Route::match(['get', 'post'], 'order-failure/{id1}', 'App\Http\Controllers\FrontController@orderFailure');
 
-        Route::match(['get', 'post'], '/specials', 'App\Http\Controllers\FrontController@home');
-        Route::match(['get', 'post'], '/contact', 'App\Http\Controllers\FrontController@home');
-        Route::match(['get', 'post'], '/faq', 'App\Http\Controllers\FrontController@home');
+        Route::match(['get', 'post'], '/specials', 'App\Http\Controllers\FrontController@specials');
+        Route::match(['get', 'post'], '/contact', 'App\Http\Controllers\FrontController@contactUs');
+        Route::match(['get', 'post'], '/faq', 'App\Http\Controllers\FrontController@faq');
+        Route::match(['get', 'post'], 'page/{id1}', 'App\Http\Controllers\FrontController@page');
     // before login
     // authentication
         Route::match(['get', 'post'], '/login', 'App\Http\Controllers\FrontController@signin');

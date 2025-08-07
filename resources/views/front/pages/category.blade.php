@@ -5,6 +5,7 @@ use App\Models\UserReview;
 ?>
 <section class="category_section">
     <div class="container">
+        <h3 class="mb-3"><?=$page_header?></h3>
         <div class="row">
             <div class="col-md-4 col-lg-3 mb-3 mb-md-0">
                 <div class="left-sidebar">

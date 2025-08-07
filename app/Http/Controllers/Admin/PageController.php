@@ -39,7 +39,7 @@ class PageController extends Controller
                 $rules = [
                     'page_title'                => 'required',
                     // 'short_description'         => 'required',
-                    'long_description'          => 'required',
+                    // 'long_description'          => 'required',
                 ];
                 if($this->validate($request, $rules)){
                     /* page banner image */
@@ -91,7 +91,7 @@ class PageController extends Controller
                 $rules = [
                     'page_title'                => 'required',
                     // 'short_description'         => 'required',
-                    'long_description'          => 'required',
+                    // 'long_description'          => 'required',
                 ];
                 if($this->validate($request, $rules)){
                     /* page banner image */

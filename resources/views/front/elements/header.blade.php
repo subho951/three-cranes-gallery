@@ -67,11 +67,13 @@ use App\Models\Product;
             <div class="col-lg-8 col-md-9 col-12">
                 <div class="search-box">
                     <div class="search-area">
-                        <form action=""> <input type="text" class="form-control" placeholder="What are you looking for..."
-                                value="">
+                        <form action="" id="searchForm">
+                            <input type="text" class="form-control" placeholder="What are you looking for..." id="searchInput">
                         </form>
-
                         <button><img src="<?= env('FRONT_ASSETS_URL') ?>images/search_icon.png" alt="logo"></button>
+                        <ul id="searchResults">
+                            
+                        </ul>
                     </div>
                     <ul>
                         <?php if(session('user_id')) {?>
@@ -114,7 +116,8 @@ use App\Models\Product;
                                     $subCats = Category::select('id', 'category_name', 'slug')->where('parent_id', '=', $mainCat->id)->where('status', '=', 1)->get();
                                 ?>
                                     <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle" href="<?=url('products/' . $mainCat->slug)?>" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <!-- <a class="nav-link dropdown-toggle" href="<?=url('products/' . $mainCat->slug)?>" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false"> -->
+                                        <a class="nav-link dropdown-toggle" href="<?=url('products/' . $mainCat->slug)?>" id="navbarDropdownMenuLink" role="button">
                                             <?=$mainCat->category_name?>
                                         </a>
                                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -140,15 +143,15 @@ use App\Models\Product;
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= url('specials') ?>" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Specials</a>
+                                    <a class="nav-link" href="<?= url('specials') ?>" id="navbarDropdownMenuLink" role="button"> Specials</a>
                                 </li>
                                 
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= url('faq') ?>" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false"> FAQs</a>
+                                    <a class="nav-link" href="<?= url('faq') ?>" id="navbarDropdownMenuLink" role="button"> FAQs</a>
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= url('contact') ?>" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Contact</a>
+                                    <a class="nav-link" href="<?= url('contact') ?>" id="navbarDropdownMenuLink" role="button"> Contact</a>
                                 </li>
                             </ul>
                         </div>

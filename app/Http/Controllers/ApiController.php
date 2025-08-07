@@ -342,7 +342,7 @@ class ApiController extends Controller
                 $apiStatus          = FALSE;
                 $apiMessage         = 'All Data Are Not Present !!!';
             }
-            if($headerData['key'][0] == env('PROJECT_KEY')){
+            if($requestData['key'] == env('PROJECT_KEY')){
                 $checkSubscriberExist = Subscriber::where('email', '=', $requestData['email'])->count();
                 if($checkSubscriberExist <= 0){
                     $postData = [
@@ -1952,13 +1952,13 @@ class ApiController extends Controller
                 $apiMessage         = 'All Data Are Not Present !!!';
             }
             if($headerData['key'][0] == env('PROJECT_KEY')){
-                $app_access_token           = $headerData['authorization'][0];
-                $getTokenValue              = $this->tokenAuth($app_access_token);
-                if($getTokenValue['status']){
-                    $uId        = $getTokenValue['data'][1];
-                } else {
-                    $uId        = 0;
-                }
+                // $app_access_token           = $headerData['authorization'][0];
+                // $getTokenValue              = $this->tokenAuth($app_access_token);
+                // if($getTokenValue['status']){
+                //     $uId        = $getTokenValue['data'][1];
+                // } else {
+                //     $uId        = 0;
+                // }
                 $search_keyword         = $requestData['search_keyword'];
                 $product_list           = [];
                 $products               = DB::table('products')
@@ -1983,7 +1983,8 @@ class ApiController extends Controller
                         $clientIp                       = $request->ip();
                         $deviceId                       = $this->createDeviceFingerprint($userAgent, $acceptLanguage, $clientIp);
                         $checkCart                      = OrderDetail::where('cust_device_id', '=', $deviceId)->where('product_id', '=', $product->id)->where('is_cart', '=', 1)->count();
-                        $checkWishlist                  = UserWishlist::where('user_id', '=', $uId)->where('product_id', '=', $product->id)->count();
+                        // $checkWishlist                  = UserWishlist::where('user_id', '=', $uId)->where('product_id', '=', $product->id)->count();
+                        $checkWishlist                  = UserWishlist::where('product_id', '=', $product->id)->count();
                         $checkProductVariation          = ProductVariation::where('product_id', '=', $product->id)->orderBy('price', 'asc')->first();
                         $apiResponse[]                  = [
                             'id'                    => $product->id,

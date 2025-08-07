@@ -63,7 +63,7 @@ class FrontController extends Controller
             $data['subcategory']            = Category::where('parent_id', '=', $parent_id)->get();
             $data['products']               = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->where('status', '=', 1)->where('main_category', '=', $parent_id)->orderBy('id', 'DESC')->get();
 
-            $title                          = (($data['getCategory'])?$data['getCategory']->category_name:"Parent Category");
+            $title                          = (($data['getCategory'])?$data['getCategory']->category_name:"");
             $page_name                      = 'category';
             echo $this->front_before_login_layout($title,$page_name,$data);
         }
@@ -129,7 +129,7 @@ class FrontController extends Controller
                 $data['minPrice']               = $min_price;
                 $data['maxPrice']               = $max_price;
             }
-            $title                          = (($data['getCategory'])?$data['getCategory']->category_name:"Parent Category");
+            $title                          = (($data['subcategory'])?$data['subcategory']->category_name:"");
             $page_name                      = 'sub-category';
             echo $this->front_before_login_layout($title,$page_name,$data);
         }
