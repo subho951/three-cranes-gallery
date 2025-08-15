@@ -2,7 +2,9 @@
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\UserWishlist;
 use App\Models\UserReview;
+use App\Helpers\Helper;
 ?>
 <?php if($product){?>
     <?php
@@ -34,6 +36,12 @@ use App\Models\UserReview;
     <section class="product_dtl">
         <div class="container">
             <div class="row">
+                @if(session('success_message'))
+                    <h6 class="alert alert-success autohide">{{ session('success_message') }}</h6>
+                @endif
+                @if(session('error_message'))
+                    <h6 class="alert alert-danger autohide">{{ session('error_message') }}</h6>
+                @endif
                 <div class="col-lg-7">
                     <div class="gallery-container">
                         <!-- Main Vertical Slider -->
@@ -68,87 +76,123 @@ use App\Models\UserReview;
                 </div>
                 <div class="col-lg-5">
                     <div class="product-details">
-                        <h2 class="mt-3 mt-lg-0"><?=$product->name?></h2>
-                        <ul class="rating-list mt-3 mt-lg-0">
-                            <li>
-                                <ul>
-                                    <?php if($avgRating > 0 && $avgRating <= 1){?>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                    <?php } elseif($avgRating > 1 && $avgRating <= 2){?>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                    <?php } elseif($avgRating > 2 && $avgRating <= 3){?>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                    <?php } elseif($avgRating > 3 && $avgRating <= 4){?>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
-                                    <?php } elseif($avgRating > 4 && $avgRating <= 5){?>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
-                                        <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                        <form action="<?=url('/add-to-cart')?>" method="POST">
+                            @csrf
+                            <input type="hidden" name="product_id" value="<?=$product_id?>">
+                            <h2 class="mt-3 mt-lg-0"><?=$product->name?></h2>
+                            <ul class="rating-list mt-3 mt-lg-0">
+                                <li>
+                                    <ul>
+                                        <?php if($avgRating > 0 && $avgRating <= 1){?>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                        <?php } elseif($avgRating > 1 && $avgRating <= 2){?>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                        <?php } elseif($avgRating > 2 && $avgRating <= 3){?>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                        <?php } elseif($avgRating > 3 && $avgRating <= 4){?>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/star_default.png"></li>
+                                        <?php } elseif($avgRating > 4 && $avgRating <= 5){?>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                            <li><img src="<?=env('FRONT_ASSETS_URL')?>images/start_fill.png"></li>
+                                        <?php }?>
+                                    </ul>
+                                </li>
+                                <li><span><?=$avgRating?></span></li>
+                                <li><label><?=$reviewCount?> <button>(Reviews)</button></label></li>
+                                <li><label>SKU:</label><b> <?=$product->product_sku?></b></li>
+                            </ul>
+                            <div>
+                                <?=$product->short_description?>
+                            </div>
+                            <h5>$<!-- --><?=number_format($product->discounted_price,2)?> <span>$ <?=number_format($product->markup_price,2)?></span></h5>
+                            <input type="hidden" name="product_price" value="<?=$product->discounted_price?>">
+                            <?php if(!empty($variations)){?>
+                                <ul class="product-varient mt-2">
+                                    <?php foreach($variations as $variation){?>
+                                        <li>
+                                            <label> Select <?=$variation['attr_name']?></label>
+                                            <input type="hidden" name="attr_id[]" value="<?=$variation['attr_id']?>">
+                                            <select class="form-control" name="variations[]" required>
+                                                <option value="" selected>Select <?=$variation['attr_name']?></option>
+                                                <?php
+                                                $attr_vals = $variation['attr_vals'];
+                                                foreach($attr_vals as $attr_val){?>
+                                                    <option value="<?=$attr_val['attr_val_id']?>"><?=$attr_val['attr_val_name']?></option>
+                                                <?php }?>
+                                            </select>
+                                        </li>
                                     <?php }?>
                                 </ul>
-                            </li>
-                            <li><span><?=$avgRating?></span></li>
-                            <li><label><?=$reviewCount?> <button>(Reviews)</button></label></li>
-                            <li><label>SKU:</label><b> <?=$product->product_sku?></b></li>
-                        </ul>
-                        <div>
-                            <?=$product->short_description?>
-                        </div>
-                        <h5>$<!-- --><?=number_format($product->discounted_price,2)?> <span>$ <?=number_format($product->markup_price,2)?></span></h5>
-                        <ul class="product-varient mt-2">
-                            <li><label> Select Size</label><select class="form-control">
-                                    <option>M</option>
-                                    <option value="128">L Unisex Adults</option>
-                                    <option value="127">M Unisex Adults</option>
-                                    <option value="126">S Unisex Adults</option>
-                                    <option value="129">XL Unisex Adults</option>
-                                    <option value="130">XXL Unisex Adults</option>
-                                </select>
-                            </li>
-                        </ul>
-                        <ul class="quantity-add">
-                            <li>
-                                <div class="quantity-box">
-                                    <button disabled="">
-                                        <img src="<?=env('FRONT_ASSETS_URL')?>images/minus_icon.png">
+                            <?php }?>
+                            <ul class="quantity-add">
+                                <li>
+                                    <div class="quantity-box">
+                                        <a id="minus-btn" disabled>
+                                            <img src="<?=env('FRONT_ASSETS_URL')?>images/minus_icon.png">
+                                        </a>
+                                        <input type="text" name="product_qty" id="qty-input" placeholder="QTY" value="1">
+                                        <a id="plus-btn">
+                                            <img src="<?=env('FRONT_ASSETS_URL')?>images/plus_icon.png">
+                                        </a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <button class="addtocartBtn" id="addtocartBtn" type="submit">
+                                        <img src="<?=env('FRONT_ASSETS_URL')?>images/buy_icon.png">
+                                        Add to cart
                                     </button>
-                                    <input type="text" placeholder="QTY" value="1">
-                                    <button>
-                                        <img src="<?=env('FRONT_ASSETS_URL')?>images/plus_icon.png">
-                                    </button>
-                                </div>
-                            </li>
-                            <li>
-                                <button class="addtocartBtn">
-                                    <img src="<?=env('FRONT_ASSETS_URL')?>images/buy_icon.png">
-                                    Add to cart
-                                </button>
-                            </li>
-                        </ul>
+                                </li>
+                            </ul>
+                        </form>
                         <ul class="wishlist-sec">
+                            <?php $currentUrl = url('product/'.$product_slug); ?>
                             <li>
-                                <button>
-                                    <img src="<?=env('FRONT_ASSETS_URL')?>images/heart_icon.png">
-                                    Add to wishlist
-                                </button>
+                                <?php if(empty(session('user_id'))){?>
+                                    <a href="<?=url('signin/'.Helper::encoded($currentUrl))?>" title="Signin To Add Into Wishlist" onclick="return confirm('You\'ll need to sign in to add this item to your wishlist. Continue?');">
+                                        <button>
+                                            <img src="<?=env('FRONT_ASSETS_URL')?>images/heart_icon.png">
+                                            Add to wishlist
+                                        </button>
+                                    </a>
+                                <?php } else {?>
+                                    <?php
+                                    $checkWishlist = UserWishlist::where('user_id', '=', session('user_id'))->where('product_id', '=', $product_id)->count();
+                                    if($checkWishlist > 0){
+                                    ?>
+                                        <a href="<?=url('make-wishlist/'.Helper::encoded($product_id))?>" title="Removed From Wishlist">
+                                            <button>
+                                                <img src="<?=env('FRONT_ASSETS_URL')?>images/heart_icon.png">
+                                                Remove from wishlist
+                                            </button>
+                                        </a>
+                                    <?php } else {?>
+                                        <a href="<?=url('make-wishlist/'.Helper::encoded($product_id))?>" title="Removed From Wishlist">
+                                            <button>
+                                                <img src="<?=env('FRONT_ASSETS_URL')?>images/heart_icon.png">
+                                                Add to wishlist
+                                            </button>
+                                        </a>
+                                    <?php }?>
+                                <?php }?>
                             </li>
                         </ul>
                     </div>
@@ -341,3 +385,24 @@ use App\Models\UserReview;
         </div>
     </section>
 <?php }?>
+<script>
+    const minusBtn  = document.getElementById("minus-btn");
+    const plusBtn   = document.getElementById("plus-btn");
+    const qtyInput  = document.getElementById("qty-input");
+
+    plusBtn.addEventListener("click", () => {
+        let qty = parseInt(qtyInput.value) || 0;
+        qty++;
+        qtyInput.value = qty;
+        minusBtn.disabled = qty <= 1; // disable minus if qty is 1
+    });
+
+    minusBtn.addEventListener("click", () => {
+        let qty = parseInt(qtyInput.value) || 0;
+        if (qty > 1) {
+            qty--;
+            qtyInput.value = qty;
+        }
+        minusBtn.disabled = qty <= 1;
+    });
+</script>

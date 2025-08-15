@@ -31,8 +31,12 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Coupon;
 use App\Models\CancelOrderReason;
+use App\Models\ProductVariation;
+use App\Models\VariationAttribute;
 use App\Models\UserWishlist;
 use App\Models\UserReview;
+use App\Models\UserView;
+
 use Auth;
 use Session;
 use Helper;
@@ -168,11 +172,59 @@ class FrontController extends Controller
             $data['slug']                   = $slug;
             $data['product']                = Product::where('slug', '=', $slug)->first();
             $id                             = (($data['product'])?$data['product']->id:'');
+            $data['product_id']             = $id;
+            $data['product_slug']           = $slug;
             $data['product_images']         = ProductImage::select('image')->where('status', '=', 1)->where('product_id', '=', $id)->get();
             
             $data['reviewCount']            = UserReview::where('product_id', '=', $id)->where('status', '=', 1)->count();
             $data['reviewSum']              = UserReview::where('product_id', '=', $id)->where('status', '=', 1)->sum('rating');
             $data['avgRating']              = (($data['reviewCount'] > 0)?($data['reviewSum'] / $data['reviewCount']):0);
+
+            // variation
+                $dropdownValues = [];
+                $getProductparentAttrs = VariationAttribute::select('parent_attr_id')->where('status', '=', 1)->where('product_id', '=', $id)->groupBy('parent_attr_id')->get();
+                if($getProductparentAttrs){
+                    foreach($getProductparentAttrs as $getProductparentAttr){
+                        $parent_attr_id = $getProductparentAttr->parent_attr_id;
+                        $getAttributeName = Attribute::select('name')->where('status', '=', 1)->where('id', '=', $parent_attr_id)->first();
+                        $getProductparentAttrVals = VariationAttribute::select('attribute_id')->where('status', '=', 1)->where('product_id', '=', $id)->where('parent_attr_id', '=', $parent_attr_id)->get();
+                        // Helper::pr($getProductparentAttrVals);
+                        $attr_vals = [];
+                        if($getProductparentAttrVals){
+                            foreach($getProductparentAttrVals as $getProductparentAttrVal){
+                                // $dropdownValues['variation' . $parent_attr_id][] = $parent_attr_id . '/' . $getProductparentAttrVal->attribute_id;
+                                $getAttributeValName = AttributeValue::select('attr_value')->where('status', '=', 1)->where('id', '=', $getProductparentAttrVal->attribute_id)->first();
+                                $attr_vals[] = [
+                                    'attr_val_id'   => $getProductparentAttrVal->attribute_id,
+                                    'attr_val_name' => (($getAttributeValName)?$getAttributeValName->attr_value:''),
+                                ];
+                                
+                            }
+                        }
+                        $dropdownValues[] = [
+                            'attr_id'   => $parent_attr_id,
+                            'attr_name' => (($getAttributeName)?$getAttributeName->name:''),
+                            'attr_vals' => $attr_vals,
+                        ];
+                    }
+                }
+                
+                // Function to remove duplicates from nested arrays
+                foreach ($dropdownValues as &$attribute) {
+                    $uniqueVals = [];
+                    foreach ($attribute['attr_vals'] as $value) {
+                        // Use attr_val_id and attr_val_name as a unique key
+                        $key = $value['attr_val_id'] . '_' . $value['attr_val_name'];
+                        if (!isset($uniqueVals[$key])) {
+                            $uniqueVals[$key] = $value;
+                        }
+                    }
+                    // Replace attr_vals with unique values
+                    $attribute['attr_vals'] = array_values($uniqueVals);
+                }
+                $data['variations'] = $dropdownValues;
+                // Helper::pr($data['variations']);
+            // variation
             
             if($request->isMethod('post')){
                 $postData       = $request->all();
@@ -239,7 +291,7 @@ class FrontController extends Controller
                 }
                 $data['similar_products']       = $similarProducts;
             /* similar products */
-            // Helper::pr($data['similar_products']);
+            
             $title                          = 'Product Details';
             $page_name                      = 'product-details';
             echo $this->front_before_login_layout($title,$page_name,$data);
@@ -286,10 +338,12 @@ class FrontController extends Controller
             $getUser                            = User::where('id', '=', $uId)->first();
             $product_id                         = Helper::decoded($pro_id);
             $getProduct                         = Product::where('id', '=', $product_id)->first();
+            
             $checkWishlist                      = UserWishlist::where('user_id', '=', $uId)->where('product_id', '=', $product_id)->count();
             if($checkWishlist){
-                $msg = $getProduct->name.' Removed From Wishlist Successfully !!!';
+                $msg = $getProduct->name.' Removed From Wishlist Successfully';
                 UserWishlist::where('user_id', '=', $uId)->where('product_id', '=', $product_id)->delete();
+
                 /* email functionality */
                     $mailData['getProduct']     = $getProduct;
                     $mailData['mailHeader']     = $mailData['getProduct']->name.' removed successfully from wishlist';
@@ -308,12 +362,13 @@ class FrontController extends Controller
                     EmailLog::insertGetId($postData2);
                 /* email log save */
             } else {
-                $msg = $getProduct->name.' Added Into Wishlist Successfully !!!';
+                $msg = $getProduct->name.' Added Into Wishlist Successfully';
                 $fields = [
                     'user_id'       => $uId,
                     'product_id'    => $product_id,
                 ];
                 UserWishlist::insert($fields);
+
                 /* email functionality */
                     $mailData['getProduct']     = $getProduct;
                     $mailData['mailHeader']     = $mailData['getProduct']->name.' added successfully into wishlist';
@@ -332,92 +387,200 @@ class FrontController extends Controller
                     EmailLog::insertGetId($postData2);
                 /* email log save */
             }
-            $currentUrl = url('product-details/'.Helper::encoded($product_id));
+            
+            $currentUrl = url('product/' . (($getProduct)?$getProduct->slug:''));
             return redirect($currentUrl)->with('success_message', $msg);
         }
     /* product details */
     /* add to cart & order place */
         public function addToCart(Request $request){
             if($request->isMethod('post')){
-                $postData       = $request->all();
-                // Helper::pr($postData);
-                $generalSetting = GeneralSetting::find('1');
-                $shipping_charge_percent = $generalSetting->shipping_charge_percent;
-                $tax_percent    = $generalSetting->tax_percent;
+                $postData                                   = $request->all();
+                $generalSetting                             = GeneralSetting::find('1');
+
+                $tax_percent                                = $generalSetting->tax_percent;
+                $domestic_free_shipping_min_amount          = $generalSetting->domestic_free_shipping_min_amount;
+                $domestic_shipping_single_item              = $generalSetting->domestic_shipping_single_item;
+                $domestic_shipping_multiple_item            = $generalSetting->domestic_shipping_multiple_item;
+                $international_shipping_single_item         = $generalSetting->international_shipping_single_item;
+                $international_shipping_multiple_item       = $generalSetting->international_shipping_multiple_item;
                 
-                $total          = ($postData['rate'] * $postData['product_qty']);
-                $shipping_amt   = (($total * $shipping_charge_percent)/100);
-                $tax_amt        = (($total * $tax_percent)/100);
-                $net_amt        = ($total + $shipping_amt + $tax_amt);
-                if (array_key_exists("parent_id",$postData)) {
-                    $parent_id      = $postData['parent_id'];
-                    $parent_id_val  = $postData['parent_id_val'];
-                } else {
-                    $parent_id      = [];
-                    $parent_id_val  = [];
-                }
-                
-                $child_id       = [];
-                $child_id_val   = [];
-                if(!empty($parent_id)){
-                    for($p=0;$p<count($parent_id);$p++){
-                        $child_id_array     = explode("/", $postData['child_id'.$parent_id[$p]]);
-                        $child_id[]         = $child_id_array[1];
-                        $getAttrVal         = AttributeValue::select('attr_value')->where('id', '=', $child_id_array[1])->first();
-                        $child_id_val[]     = (($getAttrVal)?$getAttrVal->attr_value:'');
+                $product_id                                 = $postData['product_id'];
+                $product_qty                                = $postData['product_qty'];
+                $product_rate                               = $postData['product_price'];
+                $attr_id                                    = $postData['attr_id'];
+                $variationsArray                            = $postData['variations'];
+
+                $getProduct         = DB::table('products')
+                                        ->join('categories', 'products.sub_category', '=', 'categories.id')
+                                        ->select('products.*', 'categories.category_name as sub_category_name')
+                                        ->where('products.status', '=', 1)
+                                        ->where('products.id', '=', $product_id)
+                                        ->first();
+                if($getProduct){
+                    $generalSetting             = GeneralSetting::find('1');
+                                        
+                    $parent_id                  = [];
+                    $parent_id_val              = [];
+                    $child_id                   = [];
+                    $child_id_val               = [];
+                    
+                    $userAgent                  = $request->header('User-Agent', 'unknown');
+                    $acceptLanguage             = $request->header('Accept-Language', 'en');
+                    $clientIp                   = $request->ip();
+                    $deviceId                   = $this->createDeviceFingerprint($userAgent, $acceptLanguage, $clientIp);
+                    $checkProductInCart         = OrderDetail::where('cust_device_id', '=', $deviceId)->where('product_id', '=', $product_id)->where('is_cart', '=', 1)->first();
+                    
+                    /* variation add */
+                        $attrName       = [];
+                        $variation_name = '';
+                        $variation_id   = 0;
+                        if(!empty($variationsArray)){
+                            for($v=0;$v<count($variationsArray);$v++){
+                                $getVariationAttrVal = AttributeValue::select('attr_value')->where('id', '=', $variationsArray[$v])->first();
+                                if($getVariationAttrVal){
+                                    $attrName[] = $getVariationAttrVal->attr_value;
+                                }
+                            }
+                            $variationCount = count($variationsArray);
+                            $productVariationIds = DB::table('variation_attributes')
+                                ->whereIn('attribute_id', $variationsArray) // Match the attribute IDs
+                                ->select('product_variation_id')
+                                ->groupBy('product_variation_id') // Group by product_variation_id
+                                ->havingRaw('COUNT(DISTINCT attribute_id) = ' . $variationCount) // Ensure both attribute_ids exist
+                                ->pluck('product_variation_id'); // Get the product_variation_ids
+                            // Helper::pr($productVariationIds);
+                            $variation_name     = implode(', ', $attrName);
+                            $variation_id       = (($productVariationIds)?$productVariationIds[0]:0);
+                            $product_price      = $product_rate;
+                        } else {
+                            $checkProductVariation = ProductVariation::where('product_id', '=', $product_id)->orderBy('price', 'asc')->first();
+                            if($checkProductVariation){
+                                $getVariationAttrs = VariationAttribute::select('value')->where('product_id', '=', $product_id)->where('product_variation_id', '=', $checkProductVariation->id)->get();
+                                if($getVariationAttrs){
+                                    foreach($getVariationAttrs as $getVariationAttr){
+                                        $attrName[] = $getVariationAttr->value;
+                                    }
+                                }
+                                $variation_name     = implode(', ', $attrName);
+                                $variation_id       = $checkProductVariation->id;
+                                $product_price      = $checkProductVariation->price;
+                            } else {
+                                $variation_name     = '';
+                                $variation_id       = 0;
+                                $product_price      = $product_rate;
+                            }
+                        }
+                    /* variation add */
+                    $total                      = ($product_price * $product_qty);
+                  	// shipping amount calculate
+                  		$ip_address = $_SERVER['REMOTE_ADDR'];
+                        $geopluginURL = "http://www.geoplugin.net/php.gp?ip=" . $ip_address;
+                        $addrDetailsArr = unserialize(file_get_contents($geopluginURL));
+
+                        if ($addrDetailsArr && isset($addrDetailsArr['geoplugin_countryName'])) {
+                            $country = $addrDetailsArr['geoplugin_countryName'];
+                        } else {
+                            $country = '';
+                        }
+                  		if($country != ''){
+                          if($country != 'USA' || $country != 'usa' || $country != 'US' || $country != 'us'){
+                          	if($product_qty <= 1){
+                             	$shipping_rate = $international_shipping_multiple_item; 
+                            } else {
+                             	$shipping_rate = $international_shipping_single_item; 
+                            }
+                          	$shipping_amt = ($product_qty * $shipping_rate);
+                          } else {
+                            if($product_qty <= 1){
+                             	$shipping_rate = $domestic_shipping_single_item; 
+                            } else {
+                             	$shipping_rate = $domestic_shipping_multiple_item; 
+                            }
+                          	$shipping_amt = ($product_qty * $shipping_rate);
+                          }
+                        } else {
+                        	if($product_qty <= 1){
+                             	$shipping_rate = $domestic_shipping_single_item; 
+                            } else {
+                             	$shipping_rate = $domestic_shipping_multiple_item; 
+                            }
+                          	$shipping_amt = ($product_qty * $shipping_rate);
+                        }
+                  	// shipping amount calculate
+                    // $shipping_amt               = $getProduct->shipping_rate;
+                    $tax_amt                    = (($total * $tax_percent)/100);
+                    $net_amt                    = ($total + $shipping_amt + $tax_amt);
+                    if($checkProductInCart){
+                        $fields = [
+                            'parent_id'         => json_encode($parent_id),
+                            'parent_id_val'     => json_encode($parent_id_val),
+                            'child_id'          => json_encode($child_id),
+                            'child_id_val'      => json_encode($child_id_val),
+                            'variation_id'      => $variation_id,
+                            'variation_name'    => $variation_name,
+                            'rate'              => $product_price,
+                            'qty'               => $product_qty,
+                            'total'             => $total,
+                            'subtotal'          => $total,
+                            'amount_after_disc' => $total,
+                            'shipping_amt'      => $shipping_amt,
+                            'tax_amt'           => $tax_amt,
+                            'net_amt'           => $net_amt,
+                            'is_cart'           => 1,
+                        ];
+                        // Helper::pr($fields);
+                        OrderDetail::where('id', '=', $checkProductInCart->id)->update($fields);
+                        $msg = 'Product Successfully Updated Into Cart !!!';
+                    } else {
+                        $fields = [
+                            'cust_device_id'    => $deviceId,
+                            'product_id'        => $product_id,
+                            'parent_id'         => json_encode($parent_id),
+                            'parent_id_val'     => json_encode($parent_id_val),
+                            'child_id'          => json_encode($child_id),
+                            'child_id_val'      => json_encode($child_id_val),
+                            'variation_id'      => $variation_id,
+                            'variation_name'    => $variation_name,
+                            'rate'              => $product_price,
+                            'qty'               => $product_qty,
+                            'total'             => $total,
+                            'subtotal'          => $total,
+                            'amount_after_disc' => $total,
+                            'shipping_amt'      => $shipping_amt,
+                            'tax_amt'           => $tax_amt,
+                            'net_amt'           => $net_amt,
+                            'is_cart'           => 1,
+                        ];
+                        // Helper::pr($fields);
+                        OrderDetail::insert($fields);
+                        $msg = 'Product Successfully Added Into Cart !!!';
                     }
-                }
-                $deviceId = $this->createDeviceFingerprint();
-                $checkProductInCart = OrderDetail::where('cust_device_id', '=', $deviceId)->where('product_id', '=', $postData['product_id'])->where('is_cart', '=', 1)->first();
-                if($checkProductInCart){
-                    $fields = [
-                        'parent_id'         => json_encode($parent_id),
-                        'parent_id_val'     => json_encode($parent_id_val),
-                        'child_id'          => json_encode($child_id),
-                        'child_id_val'      => json_encode($child_id_val),
-                        'rate'              => $postData['rate'],
-                        'qty'               => $postData['product_qty'],
-                        'total'             => $total,
-                        'subtotal'          => $total,
-                        'amount_after_disc' => $total,
-                        'shipping_amt'      => $shipping_amt,
-                        'tax_amt'           => $tax_amt,
-                        'net_amt'           => $net_amt,
-                        'is_cart'           => 1,
-                    ];
-                    OrderDetail::where('id', '=', $checkProductInCart->id)->update($fields);
-                    $msg = 'Product Successfully Updated Into Cart !!!';
+                    /* view analytics track */
+                        $userAgent                      = $request->header('User-Agent', 'unknown');
+                        $acceptLanguage                 = $request->header('Accept-Language', 'en');
+                        $clientIp                       = $request->ip();
+                        $deviceId                       = $this->createDeviceFingerprint($userAgent, $acceptLanguage, $clientIp);
+                        $viewData = [
+                            'device_id'     => $deviceId,
+                            'page'          => 'add to cart',
+                            'product_id'    => 0,
+                        ];
+                        UserView::insert($viewData);
+                    /* view analytics track */
+                    return redirect(url('cart'))->with('success_message', $msg);
                 } else {
-                    $fields = [
-                        'cust_device_id'    => $deviceId,
-                        'product_id'        => $postData['product_id'],
-                        'parent_id'         => json_encode($parent_id),
-                        'parent_id_val'     => json_encode($parent_id_val),
-                        'child_id'          => json_encode($child_id),
-                        'child_id_val'      => json_encode($child_id_val),
-                        'rate'              => $postData['rate'],
-                        'qty'               => $postData['product_qty'],
-                        'total'             => $total,
-                        'subtotal'          => $total,
-                        'amount_after_disc' => $total,
-                        'shipping_amt'      => $shipping_amt,
-                        'tax_amt'           => $tax_amt,
-                        'net_amt'           => $net_amt,
-                        'is_cart'           => 1,
-                    ];
-                    // Helper::pr($fields);
-                    OrderDetail::insert($fields);
-                    $msg = 'Product Successfully Added Into Cart !!!';
+                    $msg = 'Product Not Found !!!';
+                    return redirect(url('cart'))->with('error_message', $msg);
                 }
-                return redirect(url('cart'))->with('success_message', $msg);
             }
         }
         public function createDeviceFingerprint()
         {
-            $userAgent = $_SERVER['HTTP_USER_AGENT'];
-            $acceptLanguage = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-            $ipAddress = $_SERVER['REMOTE_ADDR'];
-            $fingerprint = $userAgent . $acceptLanguage . $ipAddress;
+            $userAgent          = $_SERVER['HTTP_USER_AGENT'];
+            $acceptLanguage     = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+            $ipAddress          = $_SERVER['REMOTE_ADDR'];
+            $fingerprint        = $userAgent . $acceptLanguage . $ipAddress;
             return md5($fingerprint);
         }
         public function cart(Request $request){
@@ -425,6 +588,13 @@ class FrontController extends Controller
             $data['deviceId']               = $deviceId;
             $data['cartItems']              = OrderDetail::where('cust_device_id', '=', $deviceId)->where('is_cart', '=', 1)->where('status', '=', 0)->get();
             if($request->isMethod('post')){
+                $generalSetting                             = GeneralSetting::find('1');
+                $domestic_free_shipping_min_amount          = $generalSetting->domestic_free_shipping_min_amount;
+                $domestic_shipping_single_item              = $generalSetting->domestic_shipping_single_item;
+                $domestic_shipping_multiple_item            = $generalSetting->domestic_shipping_multiple_item;
+                $international_shipping_single_item         = $generalSetting->international_shipping_single_item;
+                $international_shipping_multiple_item       = $generalSetting->international_shipping_multiple_item;
+
                 $postData       = $request->all();
                 if($postData['mode'] == 'coupon'){
                     $coupon_code = $postData['coupon_code'];
@@ -443,6 +613,7 @@ class FrontController extends Controller
                                         $cartItems              = OrderDetail::where('cust_device_id', '=', $deviceId)->where('is_cart', '=', 1)->where('status', '=', 0)->get();
                                         if($cartItems){
                                             foreach($cartItems as $cartItem){
+                                                $product_qty = $cartItem->qty;
                                                 $subtotal = $cartItem->subtotal;
                                                 if($discount_type == 'PERCENTAGE'){
                                                     $discAmt = (($subtotal * $discount_amount)/100);
@@ -454,7 +625,41 @@ class FrontController extends Controller
                                                 $shipping_charge_percent = $generalSetting->shipping_charge_percent;
                                                 $tax_percent    = $generalSetting->tax_percent;
                                                 
-                                                $shipping_amt   = (($amount_after_disc * $shipping_charge_percent)/100);
+                                                // shipping amount calculate
+                                                    $ip_address = $_SERVER['REMOTE_ADDR'];
+                                                    $geopluginURL = "http://www.geoplugin.net/php.gp?ip=" . $ip_address;
+                                                    $addrDetailsArr = unserialize(file_get_contents($geopluginURL));
+
+                                                    if ($addrDetailsArr && isset($addrDetailsArr['geoplugin_countryName'])) {
+                                                        $country = $addrDetailsArr['geoplugin_countryName'];
+                                                    } else {
+                                                        $country = '';
+                                                    }
+                                                    if($country != ''){
+                                                    if($country != 'USA' || $country != 'usa' || $country != 'US' || $country != 'us'){
+                                                        if($product_qty <= 1){
+                                                            $shipping_rate = $international_shipping_multiple_item; 
+                                                        } else {
+                                                            $shipping_rate = $international_shipping_single_item; 
+                                                        }
+                                                        $shipping_amt = ($product_qty * $shipping_rate);
+                                                    } else {
+                                                        if($product_qty <= 1){
+                                                            $shipping_rate = $domestic_shipping_single_item; 
+                                                        } else {
+                                                            $shipping_rate = $domestic_shipping_multiple_item; 
+                                                        }
+                                                        $shipping_amt = ($product_qty * $shipping_rate);
+                                                    }
+                                                    } else {
+                                                        if($product_qty <= 1){
+                                                            $shipping_rate = $domestic_shipping_single_item; 
+                                                        } else {
+                                                            $shipping_rate = $domestic_shipping_multiple_item; 
+                                                        }
+                                                        $shipping_amt = ($product_qty * $shipping_rate);
+                                                    }
+                                                // shipping amount calculate
                                                 $tax_amt        = (($amount_after_disc * $tax_percent)/100);
                                                 $net_amt        = ($amount_after_disc + $shipping_amt + $tax_amt);
                                                 $couponData = [
@@ -481,6 +686,7 @@ class FrontController extends Controller
                                                 $getProduct = Product::where('id', '=', $cartItem->product_id)->first();
                                                 if($getProduct){
                                                     if($getProduct->sub_category == $category){
+                                                        $product_qty = $cartItem->qty;
                                                         $subtotal = $cartItem->subtotal;
                                                         if($discount_type == 'PERCENTAGE'){
                                                             $discAmt = (($subtotal * $discount_amount)/100);
@@ -492,7 +698,41 @@ class FrontController extends Controller
                                                         $shipping_charge_percent = $generalSetting->shipping_charge_percent;
                                                         $tax_percent    = $generalSetting->tax_percent;
                                                         
-                                                        $shipping_amt   = (($amount_after_disc * $shipping_charge_percent)/100);
+                                                        // shipping amount calculate
+                                                            $ip_address = $_SERVER['REMOTE_ADDR'];
+                                                            $geopluginURL = "http://www.geoplugin.net/php.gp?ip=" . $ip_address;
+                                                            $addrDetailsArr = unserialize(file_get_contents($geopluginURL));
+
+                                                            if ($addrDetailsArr && isset($addrDetailsArr['geoplugin_countryName'])) {
+                                                                $country = $addrDetailsArr['geoplugin_countryName'];
+                                                            } else {
+                                                                $country = '';
+                                                            }
+                                                            if($country != ''){
+                                                            if($country != 'USA' || $country != 'usa' || $country != 'US' || $country != 'us'){
+                                                                if($product_qty <= 1){
+                                                                    $shipping_rate = $international_shipping_multiple_item; 
+                                                                } else {
+                                                                    $shipping_rate = $international_shipping_single_item; 
+                                                                }
+                                                                $shipping_amt = ($product_qty * $shipping_rate);
+                                                            } else {
+                                                                if($product_qty <= 1){
+                                                                    $shipping_rate = $domestic_shipping_single_item; 
+                                                                } else {
+                                                                    $shipping_rate = $domestic_shipping_multiple_item; 
+                                                                }
+                                                                $shipping_amt = ($product_qty * $shipping_rate);
+                                                            }
+                                                            } else {
+                                                                if($product_qty <= 1){
+                                                                    $shipping_rate = $domestic_shipping_single_item; 
+                                                                } else {
+                                                                    $shipping_rate = $domestic_shipping_multiple_item; 
+                                                                }
+                                                                $shipping_amt = ($product_qty * $shipping_rate);
+                                                            }
+                                                        // shipping amount calculate
                                                         $tax_amt        = (($amount_after_disc * $tax_percent)/100);
                                                         $net_amt        = ($amount_after_disc + $shipping_amt + $tax_amt);
                                                         $couponData = [
@@ -541,15 +781,58 @@ class FrontController extends Controller
         public function removeCoupon(Request $request){
             $deviceId               = $this->createDeviceFingerprint();
             $cartItems              = OrderDetail::where('cust_device_id', '=', $deviceId)->where('is_cart', '=', 1)->where('status', '=', 0)->get();
+
+            $generalSetting                             = GeneralSetting::find('1');
+            $domestic_free_shipping_min_amount          = $generalSetting->domestic_free_shipping_min_amount;
+            $domestic_shipping_single_item              = $generalSetting->domestic_shipping_single_item;
+            $domestic_shipping_multiple_item            = $generalSetting->domestic_shipping_multiple_item;
+            $international_shipping_single_item         = $generalSetting->international_shipping_single_item;
+            $international_shipping_multiple_item       = $generalSetting->international_shipping_multiple_item;
+
             if($cartItems){
                 foreach($cartItems as $cartItem){
+                    $product_qty = $cartItem->qty;
                     $subtotal   = $cartItem->subtotal;
                     $amount_after_disc = $subtotal;
                     $generalSetting = GeneralSetting::find('1');
                     $shipping_charge_percent = $generalSetting->shipping_charge_percent;
                     $tax_percent    = $generalSetting->tax_percent;
                     
-                    $shipping_amt   = (($amount_after_disc * $shipping_charge_percent)/100);
+                    // shipping amount calculate
+                  		$ip_address = $_SERVER['REMOTE_ADDR'];
+                        $geopluginURL = "http://www.geoplugin.net/php.gp?ip=" . $ip_address;
+                        $addrDetailsArr = unserialize(file_get_contents($geopluginURL));
+
+                        if ($addrDetailsArr && isset($addrDetailsArr['geoplugin_countryName'])) {
+                            $country = $addrDetailsArr['geoplugin_countryName'];
+                        } else {
+                            $country = '';
+                        }
+                  		if($country != ''){
+                          if($country != 'USA' || $country != 'usa' || $country != 'US' || $country != 'us'){
+                          	if($product_qty <= 1){
+                             	$shipping_rate = $international_shipping_multiple_item; 
+                            } else {
+                             	$shipping_rate = $international_shipping_single_item; 
+                            }
+                          	$shipping_amt = ($product_qty * $shipping_rate);
+                          } else {
+                            if($product_qty <= 1){
+                             	$shipping_rate = $domestic_shipping_single_item; 
+                            } else {
+                             	$shipping_rate = $domestic_shipping_multiple_item; 
+                            }
+                          	$shipping_amt = ($product_qty * $shipping_rate);
+                          }
+                        } else {
+                        	if($product_qty <= 1){
+                             	$shipping_rate = $domestic_shipping_single_item; 
+                            } else {
+                             	$shipping_rate = $domestic_shipping_multiple_item; 
+                            }
+                          	$shipping_amt = ($product_qty * $shipping_rate);
+                        }
+                  	// shipping amount calculate
                     $tax_amt        = (($amount_after_disc * $tax_percent)/100);
                     $net_amt        = ($amount_after_disc + $shipping_amt + $tax_amt);
                     $couponData = [
