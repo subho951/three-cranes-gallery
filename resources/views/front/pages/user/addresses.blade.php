@@ -149,6 +149,7 @@ use App\Helpers\Helper;
             <div class="modal-body">
                 <form method="POST" action="" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="mode" value="address">
                     <div class="row form-style1">
                         <div class="col-lg-6">
                             <div class="form-group">

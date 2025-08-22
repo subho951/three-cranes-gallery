@@ -142,9 +142,9 @@ use App\Models\Product;
                                     </ul>
                                 </li>
 
-                                <li class="nav-item">
+                                <!-- <li class="nav-item">
                                     <a class="nav-link" href="<?= url('specials') ?>" id="navbarDropdownMenuLink" role="button"> Specials</a>
-                                </li>
+                                </li> -->
                                 
                                 <li class="nav-item">
                                     <a class="nav-link" href="<?= url('faq') ?>" id="navbarDropdownMenuLink" role="button"> FAQs</a>
