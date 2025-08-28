@@ -3,6 +3,15 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\UserReview;
 ?>
+<style>
+   .active>.page-link, .page-link.active {
+       background-color: #f9bb23;
+       border-color: #f9bb23;
+   }
+   .page-link {
+       color: #000306;
+   }
+</style>
 <section class="category_section">
     <div class="container">
         <h3 class="mb-3"><?=$page_header?></h3>
@@ -75,6 +84,17 @@ use App\Models\UserReview;
                                 </div>
                             </div>
                         <?php } }?>
+
+                        {{-- Bootstrap styled pagination --}}
+                        <div class="d-flex justify-content-center mt-3">
+                            {{ $products->links() }}
+                        </div>
+
+                        {{-- Show page info --}}
+                        <p class="text-muted text-center mt-2 fw-bold">
+                            Page {{ $products->currentPage() }} of {{ $products->lastPage() }}  
+                            (Total records: {{ $products->total() }})
+                        </p>
                     </div>
                 </div>
             </div>
