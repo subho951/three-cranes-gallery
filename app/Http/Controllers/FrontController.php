@@ -65,7 +65,10 @@ class FrontController extends Controller
             $data['getCategory']            = Category::where('slug', '=', $slug)->first();
             $parent_id                      = (($data['getCategory'])?$data['getCategory']->id:0);
             $data['subcategory']            = Category::where('parent_id', '=', $parent_id)->get();
-            $data['products']               = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->where('status', '=', 1)->where('main_category', '=', $parent_id)->orderBy('id', 'DESC')->get();
+
+            // $data['products']               = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->where('status', '=', 1)->where('main_category', '=', $parent_id)->orderBy('id', 'DESC')->get();
+            $data['productCount']           = Product::where('status', '=', 1)->where('main_category', '=', $parent_id)->orderBy('id', 'DESC')->count();
+            $data['products']               = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->where('status', '=', 1)->where('main_category', '=', $parent_id)->orderBy('id', 'DESC')->paginate(6);
 
             $title                          = (($data['getCategory'])?$data['getCategory']->category_name:"");
             $page_name                      = 'category';
@@ -80,10 +83,10 @@ class FrontController extends Controller
             $parent_id                      = (($data['getCategory'])?$data['getCategory']->id:0);
 
             $data['subcategory']            = Category::where('slug', '=', $slug2)->first();
-            $child_id                      = (($data['subcategory'])?$data['subcategory']->id:0);
+            $child_id                       = (($data['subcategory'])?$data['subcategory']->id:0);
 
             $data['products']               = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->where('status', '=', 1)->where('main_category', '=', $parent_id)->where('sub_category', '=', $child_id)->orderBy('id', 'DESC')->get();
-            
+                        
             $data['parent_id']              = $parent_id;
             $data['child_id']               = $child_id;
             $data['minPrice']               = Product::where('status', '=', 1)->where('sub_category', '=', $child_id)->min('discounted_price');
