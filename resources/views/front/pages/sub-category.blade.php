@@ -30,7 +30,20 @@ use App\Models\UserReview;
                                     <div class="product-img">
                                         <div class="product-img-box">
                                             <a href="<?=url('/product/' . $product->slug)?>">
-                                                <img src="<?=env('UPLOADS_URL').'/product/' . $product->cover_image?>" class="img-fluid" alt="<?=$product->name?>">
+                                                <?php
+                                                $url = env('UPLOADS_URL').'product/'.$product->cover_image;
+                                                $headers = @get_headers($url);
+                                                if ($headers && strpos($headers[0], '200')) {
+                                                    $imageLink        = rawurlencode(env('UPLOADS_URL').'product/'.$product->cover_image);
+                                                    $resizeImageLink  = 'https://res.cloudinary.com/ddv59fl2y/image/fetch/w_300/' . $imageLink;
+                                                    $imageData        = file_get_contents($resizeImageLink);
+                                                    $generatedImage   = 'data:image/png;base64,' . base64_encode($imageData);
+                                                    echo $html        = '<img src="' . $generatedImage . '" class="img-fluid" alt="<?=$product->name?>" />';
+                                                } else {
+                                                ?>
+                                                    <img src="<?=env('UPLOADS_URL').'product/'.$product->cover_image?>" class="img-fluid" alt="<?=$product->name?>">
+                                                <?php } ?>
+                                                <!-- <img src="<?=env('UPLOADS_URL').'/product/' . $product->cover_image?>" class="img-fluid" alt="<?=$product->name?>"> -->
                                             </a>
                                         </div>
                                         <div class="add-callection">
