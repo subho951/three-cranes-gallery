@@ -96,134 +96,230 @@ function formatCartItems($items)
     }
     window.initAutocomplete = initAutocomplete;
 </script>
-<section class="register-form-section login-form shipping-form-section section-padding">
-    <div class=" container-xxl container-xl container-lg container-md container-sm container">
-        <div class="row justify-content-center">
-            @if(session('success_message'))
-            <h6 class="alert alert-success autohide">{{ session('success_message') }}</h6>
-            @endif
-            @if(session('error_message'))
-            <h6 class="alert alert-danger autohide">{{ session('error_message') }}</h6>
-            @endif
-            <div class="col-12 col-lg-8 col-xl-8 col-md-12">
-                <div class="text-end mb-3">
-                    <button class="btn btn-lg btn-outline-warning" data-bs-toggle="modal" data-bs-target="#address">Add New Address</button>
-                </div>
-                <div class="add-d-flex">
-                    <?php $currentUrl = url('checkout/'); ?>
-                    <div class="checkout-add">
-                        <h5 class="mb-2">Shipping Address</h5>
-                        <?php if(count($getShippingAddrs) > 0){ foreach($getShippingAddrs as $row){?>
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <div class="addres-head">
-                                        <p><?=$row->title?></p>
-                                        <input type="radio" class="existing_shipping" name="shipping" id="shipping<?=$row->id?>" value="<?=$row->id?>" required>
-                                        <label for="shipping<?=$row->id?>"><span class="btn btn-sm btn-outline-secondary">Select Address</span></label>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <p><?=$row->address?> <?=$row->street_no?> <?=$row->locality?>, <?=$row->city?>, <?=$row->state?> <?=$row->zipcode?>, <?=$row->country?></p>
-                                </div>
-                            </div>
-                        <?php } }?>
+<form method="POST" action="<?=url('place-order')?>" enctype="multipart/form-data">
+    @csrf
+    <input type="hidden" name="mode" value="order">
+    <input type="hidden" name="checkout_type" value="EXISTING">
+    <section class="register-form-section login-form shipping-form-section section-padding">
+        <div class=" container-xxl container-xl container-lg container-md container-sm container">
+            <div class="row justify-content-center">
+                @if(session('success_message'))
+                <h6 class="alert alert-success autohide">{{ session('success_message') }}</h6>
+                @endif
+                @if(session('error_message'))
+                <h6 class="alert alert-danger autohide">{{ session('error_message') }}</h6>
+                @endif
+                <div class="col-12 col-lg-8 col-xl-8 col-md-12">
+                    <div class="text-end mb-3">
+                        <button class="btn btn-lg btn-outline-warning" data-bs-toggle="modal" data-bs-target="#address">Add New Address</button>
                     </div>
-                    <div class="checkout-add">
-                        <h5 class="mb-2">Billing Address</h5>
-                        <?php if(count($getBillingAddrs) > 0){ foreach($getBillingAddrs as $row){?>
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <div class="addres-head">
-                                        <p><?=$row->title?></p>
-                                        <input type="radio" class="existing_billing" name="billing" id="billing<?=$row->id?>" value="<?=$row->id?>" required>
-                                        <label for="billing<?=$row->id?>"><span class="btn btn-sm btn-outline-secondary">Select Address</span></label>
+                    <div class="add-d-flex">
+                        <?php $currentUrl = url('checkout/'); ?>
+                        <div class="checkout-add">
+                            <h5 class="mb-2">Shipping Address</h5>
+                            <?php if(count($getShippingAddrs) > 0){ foreach($getShippingAddrs as $row){?>
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <div class="addres-head">
+                                            <p><?=$row->title?></p>
+                                            <input type="radio" class="existing_shipping" name="shipping" id="shipping<?=$row->id?>" value="<?=$row->id?>" required>
+                                            <label for="shipping<?=$row->id?>"><span class="btn btn-sm btn-outline-secondary">Select Address</span></label>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><?=$row->address?> <?=$row->street_no?> <?=$row->locality?>, <?=$row->city?>, <?=$row->state?> <?=$row->zipcode?>, <?=$row->country?></p>
                                     </div>
                                 </div>
-                                <div class="card-body">
-                                    <p><?=$row->address?> <?=$row->street_no?> <?=$row->locality?>, <?=$row->city?>, <?=$row->state?> <?=$row->zipcode?>, <?=$row->country?></p>
+                            <?php } }?>
+                        </div>
+                        <div class="checkout-add">
+                            <h5 class="mb-2">Billing Address</h5>
+                            <?php if(count($getBillingAddrs) > 0){ foreach($getBillingAddrs as $row){?>
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <div class="addres-head">
+                                            <p><?=$row->title?></p>
+                                            <input type="radio" class="existing_billing" name="billing" id="billing<?=$row->id?>" value="<?=$row->id?>" required>
+                                            <label for="billing<?=$row->id?>"><span class="btn btn-sm btn-outline-secondary">Select Address</span></label>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><?=$row->address?> <?=$row->street_no?> <?=$row->locality?>, <?=$row->city?>, <?=$row->state?> <?=$row->zipcode?>, <?=$row->country?></p>
+                                    </div>
+                                </div>
+                            <?php } }?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-5 col-md-12 col-12">
+                    <div class="checkout-review-order-table-wrapper">
+                        <div class="title-product-name">Product</div>
+                        <div class="shop_table">
+                            <?php
+                            $subtotal_tot        = 0;
+                            $disc_tot            = 0;
+                            $after_disc_tot      = 0;
+                            $shipping_tot        = 0;
+                            $tax_tot             = 0;
+                            $net_tot             = 0;
+                            if(count($cartItems) > 0){ foreach($cartItems as $cartItem){
+                                $getProduct    = Product::select('id', 'name', 'slug', 'cover_image')->where('id', '=', $cartItem->product_id)->first();
+                                $subtotal_tot        += $cartItem->subtotal;
+                                $disc_tot            += $cartItem->disc_amount;
+                                $after_disc_tot      += $cartItem->amount_after_disc;
+                                $shipping_tot        += $cartItem->shipping_amt;
+                                $tax_tot             += $cartItem->tax_amt;
+                                $net_tot             += $cartItem->net_amt;
+                                $parent_id_val       = json_decode($cartItem->parent_id_val);
+                                $child_id_val        = json_decode($cartItem->child_id_val);
+                            ?>
+                                <div class="cart_item-ccheck">
+                                    <div class="info-product">
+                                        <div class="product-thumble">
+                                            <img width="50" src="<?=env('UPLOADS_URL').'product/'.(($getProduct)?$getProduct->cover_image:'')?>" class="imd-fluid" alt="<?=(($getProduct)?$getProduct->name:'')?>">
+                                        </div>
+                                        <div class="product-name">
+                                            <p><?=(($getProduct)?$getProduct->name:'')?> </p>
+                                            <strong class="product-quantity">QTY : <?=$cartItem->qty?></strong><br>
+                                            <span><?=$cartItem->variation_name?></span>
+                                        </div>
+                                    </div>
+                                    <div class="product-total">
+                                        <span class="amount">
+                                            <bdi><span class="Price-currencySymbol">$ </span><?=number_format($cartItem->rate,2)?></bdi>
+                                        </span>
+                                        <!-- <sub>$48.00</sub> -->
+                                    </div>
+                                </div>
+                            <?php } }?>
+                            <div class="cart-subtotal-list">
+                                <h2>Subtotal</h2>
+                                <div class="subtotal-price">
+                                    <span class="Price-amount amount">
+                                        <bdi><span class="Price-currencySymbol">$ </span><?=number_format($subtotal_tot,2)?></bdi>
+                                    </span>
+                                    <input type="hidden" name="subtotal" value="<?=$subtotal_tot?>">
                                 </div>
                             </div>
-                        <?php } }?>
+                            <div class="cart-subtotal-list">
+                                <h2>Discount</h2>
+                                <div class="subtotal-price">
+                                    <span class="Price-amount amount">
+                                        <bdi><span class="Price-currencySymbol">-$ </span><?=number_format($disc_tot,2)?></bdi>
+                                    </span>
+                                    <input type="hidden" name="disc_amount" value="<?=$disc_tot?>">
+                                    <input type="hidden" name="amount_after_disc" value="<?=$after_disc_tot?>">
+                                </div>
+                            </div>
+                            <div class="cart-subtotal-list">
+                                <h2>Shipping</h2>
+                                <div class="subtotal-price">
+                                    <span class="Price-amount amount">
+                                        <bdi><span class="Price-currencySymbol">$ </span><?=number_format($shipping_tot,2)?></bdi>
+                                    </span>
+                                    <input type="hidden" name="shipping_amt" value="<?=$shipping_tot?>">
+                                </div>
+                            </div>
+                            <div class="cart-subtotal-list">
+                                <h2>Tax</h2>
+                                <div class="subtotal-price">
+                                    <span class="Price-amount amount">
+                                        <bdi><span class="Price-currencySymbol">$ </span><?=number_format($tax_tot,2)?></bdi>
+                                    </span>
+                                    <input type="hidden" name="tax_amt" value="<?=$tax_tot?>">
+                                </div>
+                            </div>
+                            <div class="cart-subtotal-list order-total">
+                                <h2>Total</h2>
+                                <div class="total-price">
+                                    <strong>
+                                        <span class="amount">
+                                            <bdi><span class="Price-currency">$ </span><?=number_format($net_tot,2)?></bdi>
+                                        </span>
+                                    </strong>
+                                    <input type="hidden" name="net_amt" value="<?=$net_tot?>">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="payment" class="checkout-payment">
+                            <div class="form-row place-order">
+                                <button type="button" class="button btn-place-order common-btn" data-bs-toggle="modal" data-bs-target="#pay">Pay &amp; Place order</button></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-4 col-lg-5 col-md-12 col-12">
-                <div class="checkout-review-order-table-wrapper">
-                    <div class="title-product-name">Product</div>
-                    <div class="shop_table">
-                        <?php
-                        $subtotal_tot        = 0;
-                        $disc_tot            = 0;
-                        $after_disc_tot      = 0;
-                        $shipping_tot        = 0;
-                        $tax_tot             = 0;
-                        $net_tot             = 0;
-                        if(count($cartItems) > 0){ foreach($cartItems as $cartItem){
-                            $getProduct    = Product::select('id', 'name', 'slug', 'cover_image')->where('id', '=', $cartItem->product_id)->first();
-                            $subtotal_tot        += $cartItem->subtotal;
-                            $disc_tot            += $cartItem->disc_amount;
-                            $after_disc_tot      += $cartItem->amount_after_disc;
-                            $shipping_tot        += $cartItem->shipping_amt;
-                            $tax_tot             += $cartItem->tax_amt;
-                            $net_tot             += $cartItem->net_amt;
-                            $parent_id_val       = json_decode($cartItem->parent_id_val);
-                            $child_id_val        = json_decode($cartItem->child_id_val);
-                        ?>
-                            <div class="cart_item-ccheck">
-                                <div class="info-product">
-                                    <div class="product-thumble">
-                                        <img width="50" src="<?=env('UPLOADS_URL').'product/'.(($getProduct)?$getProduct->cover_image:'')?>" class="imd-fluid" alt="<?=(($getProduct)?$getProduct->name:'')?>">
+        </div>
+    </section>
+
+    <!-- pay-model- -->
+    <div class="modal fade" id="pay" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title h4">Card Details</div><button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="rccs" data-testid="rccs">
+                                <div data-testid="rccs__card" class="rccs__card rccs__card--unknown">
+                                    <div class="rccs__card--front">
+                                        <div class="rccs__card__background"></div>
+                                        <div class="rccs__issuer"></div>
+                                        <div class="rccs__cvc__front"></div>
+                                        <div class="rccs__number">•••• •••• •••• ••••</div>
+                                        <div class="rccs__name">YOUR NAME HERE</div>
+                                        <div class="rccs__expiry">
+                                            <div class="rccs__expiry__valid">valid thru</div>
+                                            <div class="rccs__expiry__value">••/••••</div>
+                                        </div>
+                                        <div class="rccs__chip"></div>
                                     </div>
-                                    <div class="product-name">
-                                        <p><?=(($getProduct)?$getProduct->name:'')?> </p>
-                                        <strong class="product-quantity">QTY : <?=$cartItem->qty?></strong><br>
-                                        <span><?=$cartItem->variation_name?></span>
+                                    <div class="rccs__card--back">
+                                        <div class="rccs__card__background"></div>
+                                        <div class="rccs__stripe"></div>
+                                        <div class="rccs__signature"></div>
+                                        <div class="rccs__cvc"></div>
+                                        <div class="rccs__issuer"></div>
                                     </div>
-                                </div>
-                                <div class="product-total">
-                                    <span class="amount">
-                                        <bdi><span class="Price-currencySymbol">$ </span><?=number_format($cartItem->rate,2)?></bdi>
-                                    </span>
-                                    <!-- <sub>$48.00</sub> -->
                                 </div>
                             </div>
-                        <?php } }?>
-                        <div class="cart-subtotal-list">
-                            <h2>Subtotal</h2>
-                            <div class="subtotal-price"><span class="Price-amount amount"><bdi><span
-                                            class="Price-currencySymbol">$ </span><?=number_format($subtotal_tot,2)?></bdi></span></div>
                         </div>
-                        <div class="cart-subtotal-list">
-                            <h2>Discount</h2>
-                            <div class="subtotal-price"><span class="Price-amount amount"><bdi><span
-                                            class="Price-currencySymbol">-$ </span><?=number_format($disc_tot,2)?></bdi></span></div>
+                        <div class="col-lg-6">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group mb-3">
+                                        <input placeholder="Card Number" class="form-control" maxlength="16" minlength="16" type="text" name="card_number" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group mb-3">
+                                        <input placeholder="Card Name" class="form-control" type="text" name="name" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <input placeholder="MM/YYYY" class="form-control" name="expiry" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <input placeholder="CVC" class="form-control" maxlength="3" minlength="3" type="password" name="cvc" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 text-end">
+                                    <button class="btn btn-outline-danger" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary ms-2">Pay Now</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="cart-subtotal-list">
-                            <h2>Shipping</h2>
-                            <div class="subtotal-price"><span class="Price-amount amount"><bdi><span
-                                            class="Price-currencySymbol">$ </span><?=number_format($shipping_tot,2)?></bdi></span></div>
-                        </div>
-                        <div class="cart-subtotal-list">
-                            <h2>Tax</h2>
-                            <div class="subtotal-price"><span class="Price-amount amount"><bdi><span
-                                            class="Price-currencySymbol">$ </span><?=number_format($tax_tot,2)?></bdi></span></div>
-                        </div>
-                        <div class="cart-subtotal-list order-total">
-                            <h2>Total</h2>
-                            <div class="total-price"><strong><span class="amount"><bdi><span
-                                                class="Price-currency">$ </span><?=number_format($net_tot,2)?></bdi></span></strong></div>
-                        </div>
-                    </div>
-                    <div id="payment" class="checkout-payment">
-                        <div class="form-row place-order"><button type="submit"
-                                class="button btn-place-order common-btn" data-bs-toggle="modal"
-                                data-bs-target="#pay">Pay &amp; Place order</button></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</form>
 
 <!-- address-model-1 -->
 <div class="modal fade" id="address" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -306,68 +402,56 @@ function formatCartItems($items)
         </div>
     </div>
 </div>
-
-<!-- pay-model- -->
-<div class="modal fade" id="pay" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title h4">Card Details</div><button type="button" class="btn-close"
-                    data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="rccs" data-testid="rccs">
-                            <div data-testid="rccs__card" class="rccs__card rccs__card--unknown">
-                                <div class="rccs__card--front">
-                                    <div class="rccs__card__background"></div>
-                                    <div class="rccs__issuer"></div>
-                                    <div class="rccs__cvc__front"></div>
-                                    <div class="rccs__number">•••• •••• •••• ••••</div>
-                                    <div class="rccs__name">YOUR NAME HERE</div>
-                                    <div class="rccs__expiry">
-                                        <div class="rccs__expiry__valid">valid thru</div>
-                                        <div class="rccs__expiry__value">••/••</div>
-                                    </div>
-                                    <div class="rccs__chip"></div>
-                                </div>
-                                <div class="rccs__card--back">
-                                    <div class="rccs__card__background"></div>
-                                    <div class="rccs__stripe"></div>
-                                    <div class="rccs__signature"></div>
-                                    <div class="rccs__cvc"></div>
-                                    <div class="rccs__issuer"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="form-group mb-3"><input placeholder="Card Number"
-                                        class="form-control" maxlength="16" type="text" value="" name="number">
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="form-group mb-3"><input placeholder="Card Name" class="form-control"
-                                        type="text" value="" name="name"></div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group mb-3"><input placeholder="MM/YY" class="form-control"
-                                        value="" name="expiry"></div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group mb-3"><input placeholder="CVC" class="form-control"
-                                        maxlength="3" type="text" value="" name="cvc"></div>
-                            </div>
-                            <div class="col-lg-12 text-end"><button class="btn btn-outline-danger" data-bs-dismiss="modal">Cancel</button><button
-                                    class="btn btn-primary ms-2">Pay Now</button></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMbNCogNokCwVmJCRfefB6iCYUWv28LjQ&libraries=places&callback=initAutocomplete&libraries=places&v=weekly"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Elements in preview card
+    const cardNumberEl = document.querySelector(".rccs__number");
+    const cardNameEl   = document.querySelector(".rccs__name");
+    const cardExpiryEl = document.querySelector(".rccs__expiry__value");
+
+    // Input fields
+    const inputNumber  = document.querySelector("input[name='card_number']");
+    const inputName    = document.querySelector("input[name='name']");
+    const inputExpiry  = document.querySelector("input[name='expiry']");
+
+    // Format card number into groups of 4
+    function formatCardNumber(num) {
+        return num.replace(/\D/g, "")
+                  .replace(/(.{4})/g, "$1 ")
+                  .trim();
+    }
+
+    // Format expiry as MM/YYYY
+    function formatExpiry(value) {
+        let cleaned = value.replace(/\D/g, ""); // only digits
+        if (cleaned.length >= 2) {
+            let mm = cleaned.substring(0, 2);
+            let yyyy = cleaned.substring(2, 6);
+            return yyyy ? mm + "/" + yyyy : mm + "/";
+        }
+        return cleaned;
+    }
+
+    // Event listeners
+    inputNumber.addEventListener("input", function() {
+        cardNumberEl.textContent = this.value ? formatCardNumber(this.value) : "•••• •••• •••• ••••";
+    });
+
+    inputName.addEventListener("input", function() {
+        cardNameEl.textContent = this.value ? this.value.toUpperCase() : "YOUR NAME HERE";
+    });
+
+    inputExpiry.addEventListener("input", function(e) {
+        let cursorPos = this.selectionStart;
+        let formatted = formatExpiry(this.value);
+
+        this.value = formatted;
+        cardExpiryEl.textContent = formatted || "••/••••";
+
+        // keep cursor at right place
+        this.selectionEnd = cursorPos + (formatted.length - this.value.length);
+    });
+});
+</script>
+

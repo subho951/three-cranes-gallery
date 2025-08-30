@@ -929,140 +929,127 @@ class FrontController extends Controller
                         }
                     }
                 /* add new billing/shipping address */
-                /* order place */
-                    if($postData['mode'] == 'order'){
-                        $uId                            = session('user_id');
-                        $getLastEnquiry                 = Order::orderBy('id', 'DESC')->first();
-                        if($getLastEnquiry){
-                            $sl_no              = $getLastEnquiry->sl_no;
-                            $next_sl_no         = $sl_no + 1;
-                            $next_sl_no_string  = str_pad($next_sl_no, 7, 0, STR_PAD_LEFT);
-                            $order_no           = 'NK-'.$next_sl_no_string;
-                        } else {
-                            $next_sl_no         = 1;
-                            $next_sl_no_string  = str_pad($next_sl_no, 7, 0, STR_PAD_LEFT);
-                            $order_no           = 'NK-'.$next_sl_no_string;
-                        }
-                        $payment_method = $postData['payment_method'];
-                        if($postData['checkout_type'] == 'EXISTING'){
-                            $getShippingAddr = [];
-                            $getCustomer    = User::where('id', '=', $uId)->first();
-                            if (array_key_exists("billing",$postData)){
-                                $getBillingAddr = UserLocation::where('id', '=', $postData['billing'])->first();
-                            } else {
-                                return redirect(url('checkout/'))->with('error_message', 'You Must Select Or Add Billing Address For Checkout !!!');
-                            }
-                            
-                            if (array_key_exists("shipping",$postData)){
-                                $getShippingAddr = UserLocation::where('id', '=', $postData['shipping'])->first();
-                            }                    
-                            $b_fname        = (($getCustomer)?$getCustomer->first_name:'');
-                            $b_lname        = (($getCustomer)?$getCustomer->last_name:'');
-                            $b_phone        = (($getCustomer)?$getCustomer->phone:'');
-                            $b_email        = (($getCustomer)?$getCustomer->email:'');
-                            $b_company      = (($getBillingAddr)?$getBillingAddr->title:'');
-                            $b_country      = (($getBillingAddr)?$getBillingAddr->country:'');
-                            $b_street       = (($getBillingAddr)?$getBillingAddr->address:'');
-                            $b_suburb       = (($getBillingAddr)?$getBillingAddr->city:'');
-                            $b_state        = (($getBillingAddr)?$getBillingAddr->state:'');
-                            $b_postcode     = (($getBillingAddr)?$getBillingAddr->zipcode:'');
-                            $s_fname        = (($getCustomer)?$getCustomer->first_name:(($getCustomer)?$getCustomer->first_name:''));
-                            $s_lname        = (($getCustomer)?$getCustomer->last_name:(($getCustomer)?$getCustomer->last_name:''));
-                            $s_phone        = (($getCustomer)?$getCustomer->phone:(($getCustomer)?$getCustomer->phone:''));
-                            $s_email        = (($getCustomer)?$getCustomer->email:(($getCustomer)?$getCustomer->email:''));
-                            $s_company      = (($getShippingAddr)?$getShippingAddr->title:(($getBillingAddr)?$getBillingAddr->title:''));
-                            $s_country      = (($getShippingAddr)?$getShippingAddr->country:(($getBillingAddr)?$getBillingAddr->country:''));
-                            $s_street       = (($getShippingAddr)?$getShippingAddr->address:(($getBillingAddr)?$getBillingAddr->address:''));
-                            $s_suburb       = (($getShippingAddr)?$getShippingAddr->city:(($getBillingAddr)?$getBillingAddr->city:''));
-                            $s_state        = (($getShippingAddr)?$getShippingAddr->state:(($getBillingAddr)?$getBillingAddr->state:''));
-                            $s_postcode     = (($getShippingAddr)?$getShippingAddr->zipcode:(($getBillingAddr)?$getBillingAddr->zipcode:''));
-                        } else {
-                            $b_fname        = $postData['b_fname'];
-                            $b_lname        = $postData['b_lname'];
-                            $b_phone        = $postData['b_phone'];
-                            $b_email        = $postData['b_email'];
-                            $b_company      = $postData['b_company'];
-                            $b_country      = $postData['b_country'];
-                            $b_street       = $postData['b_street'];
-                            $b_suburb       = $postData['b_suburb'];
-                            $b_state        = $postData['b_state'];
-                            $b_postcode     = $postData['b_postcode'];
-                            $s_fname        = $postData['s_fname'];
-                            $s_lname        = $postData['s_lname'];
-                            $s_phone        = $postData['s_phone'];
-                            $s_email        = $postData['s_email'];
-                            $s_company      = $postData['s_company'];
-                            $s_country      = $postData['s_country'];
-                            $s_street       = $postData['s_street'];
-                            $s_suburb       = $postData['s_suburb'];
-                            $s_state        = $postData['s_state'];
-                            $s_postcode     = $postData['s_postcode'];
-                        }
-                        $fields1 = [
-                            'sl_no'             => $next_sl_no,
-                            'order_no'          => $order_no,
-                            'cust_device_id'    => $deviceId,
-                            'cust_id'           => (($uId != '')?$uId:0),
-                            'cust_fname'        => $b_fname,
-                            'cust_lname'        => $b_lname,
-                            'cust_phone'        => $b_phone,
-                            'cust_email'        => $b_email,
-                            'order_date'        => date('Y-m-d'),
-                            'order_time'        => date('H:i:s'),
-                            'b_fname'           => $b_fname,
-                            'b_lname'           => $b_lname,
-                            'b_phone'           => $b_phone,
-                            'b_email'           => $b_email,
-                            'b_company'         => $b_company,
-                            'b_country'         => $b_country,
-                            'b_street'          => $b_street,
-                            'b_suburb'          => $b_suburb,
-                            'b_state'           => $b_state,
-                            'b_postcode'        => $b_postcode,
-                            's_fname'           => $s_fname,
-                            's_lname'           => $s_lname,
-                            's_phone'           => $s_phone,
-                            's_email'           => $s_email,
-                            's_company'         => $s_company,
-                            's_country'         => $s_country,
-                            's_street'          => $s_street,
-                            's_suburb'          => $s_suburb,
-                            's_state'           => $s_state,
-                            's_postcode'        => $s_postcode,
-                            'subtotal'          => $postData['subtotal'],
-                            'coupon_code'       => session('sess_coupon_code'),
-                            'disc_type'         => session('sess_disc_type'),
-                            'disc_amount'       => $postData['disc_amount'],
-                            'amount_after_disc' => $postData['amount_after_disc'],
-                            'shipping_amt'      => $postData['shipping_amt'],
-                            'tax_amt'           => $postData['tax_amt'],
-                            'net_amt'           => $postData['net_amt'],
-                            'payment_mode'      => $payment_method,
-                            'checkout_type'     => $postData['checkout_type'],
-                        ];
-                        // Helper::pr($fields1);die;
-                        $order_id = Order::insertGetId($fields1);
-                        if($order_id){
-                            $fields2 = [
-                                'order_id'  => $order_id,
-                                'cust_id'   => (($uId != '')?$uId:0),
-                                'is_cart'   => 0,
-                                'status'    => 1,
-                            ];
-                            OrderDetail::where('cust_device_id', '=', $deviceId)->where('order_id', '=', 0)->where('is_cart', '=', 1)->update($fields2);
-                            if($payment_method == 'CARD'){
-                                $request->session()->forget(['is_coupon', 'sess_coupon_code', 'sess_disc_type']);
-                                return redirect(url('pay-by-card/'.Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
-                            } else {
-                                return redirect(url('pay-by-paypal/'.Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
-                            }
-                        }
-                    }
-                /* order place */
+
             }
             $title                          = 'Checkout';
             $page_name                      = 'checkout';
             echo $this->front_before_login_layout($title,$page_name,$data);
+        }
+        public function placeOrder(Request $request){
+            $deviceId       = $this->createDeviceFingerprint();
+            $postData       = $request->all();
+            /* order place */
+                if($postData['mode'] == 'order'){
+                    $uId                            = session('user_id');
+                    $getLastEnquiry                 = Order::orderBy('id', 'DESC')->first();
+                    if($getLastEnquiry){
+                        $sl_no              = $getLastEnquiry->sl_no;
+                        $next_sl_no         = $sl_no + 1;
+                        $next_sl_no_string  = str_pad($next_sl_no, 7, 0, STR_PAD_LEFT);
+                        $order_no           = 'NK-'.$next_sl_no_string;
+                    } else {
+                        $next_sl_no         = 1;
+                        $next_sl_no_string  = str_pad($next_sl_no, 7, 0, STR_PAD_LEFT);
+                        $order_no           = 'NK-'.$next_sl_no_string;
+                    }
+                    $payment_method = 'CARD';
+                    
+                    $getShippingAddr = [];
+                    $getCustomer    = User::where('id', '=', $uId)->first();
+                    if (array_key_exists("billing",$postData)){
+                        $getBillingAddr = UserLocation::where('id', '=', $postData['billing'])->first();
+                    } else {
+                        return redirect(url('checkout/'))->with('error_message', 'You Must Select Or Add Billing Address For Checkout !!!');
+                    }
+                    
+                    if (array_key_exists("shipping",$postData)){
+                        $getShippingAddr = UserLocation::where('id', '=', $postData['shipping'])->first();
+                    }                    
+                    $b_fname        = (($getCustomer)?$getCustomer->first_name:'');
+                    $b_lname        = (($getCustomer)?$getCustomer->last_name:'');
+                    $b_phone        = (($getCustomer)?$getCustomer->phone:'');
+                    $b_email        = (($getCustomer)?$getCustomer->email:'');
+                    $b_company      = (($getBillingAddr)?$getBillingAddr->title:'');
+                    $b_country      = (($getBillingAddr)?$getBillingAddr->country:'');
+                    $b_street       = (($getBillingAddr)?$getBillingAddr->address:'');
+                    $b_suburb       = (($getBillingAddr)?$getBillingAddr->city:'');
+                    $b_state        = (($getBillingAddr)?$getBillingAddr->state:'');
+                    $b_postcode     = (($getBillingAddr)?$getBillingAddr->zipcode:'');
+                    $s_fname        = (($getCustomer)?$getCustomer->first_name:(($getCustomer)?$getCustomer->first_name:''));
+                    $s_lname        = (($getCustomer)?$getCustomer->last_name:(($getCustomer)?$getCustomer->last_name:''));
+                    $s_phone        = (($getCustomer)?$getCustomer->phone:(($getCustomer)?$getCustomer->phone:''));
+                    $s_email        = (($getCustomer)?$getCustomer->email:(($getCustomer)?$getCustomer->email:''));
+                    $s_company      = (($getShippingAddr)?$getShippingAddr->title:(($getBillingAddr)?$getBillingAddr->title:''));
+                    $s_country      = (($getShippingAddr)?$getShippingAddr->country:(($getBillingAddr)?$getBillingAddr->country:''));
+                    $s_street       = (($getShippingAddr)?$getShippingAddr->address:(($getBillingAddr)?$getBillingAddr->address:''));
+                    $s_suburb       = (($getShippingAddr)?$getShippingAddr->city:(($getBillingAddr)?$getBillingAddr->city:''));
+                    $s_state        = (($getShippingAddr)?$getShippingAddr->state:(($getBillingAddr)?$getBillingAddr->state:''));
+                    $s_postcode     = (($getShippingAddr)?$getShippingAddr->zipcode:(($getBillingAddr)?$getBillingAddr->zipcode:''));
+
+                    $fields1 = [
+                        'sl_no'             => $next_sl_no,
+                        'order_no'          => $order_no,
+                        'cust_device_id'    => $deviceId,
+                        'cust_id'           => (($uId != '')?$uId:0),
+                        'cust_fname'        => $b_fname,
+                        'cust_lname'        => $b_lname,
+                        'cust_phone'        => $b_phone,
+                        'cust_email'        => $b_email,
+                        'order_date'        => date('Y-m-d'),
+                        'order_time'        => date('H:i:s'),
+                        'b_fname'           => $b_fname,
+                        'b_lname'           => $b_lname,
+                        'b_phone'           => $b_phone,
+                        'b_email'           => $b_email,
+                        'b_company'         => $b_company,
+                        'b_country'         => $b_country,
+                        'b_street'          => $b_street,
+                        'b_suburb'          => $b_suburb,
+                        'b_state'           => $b_state,
+                        'b_postcode'        => $b_postcode,
+                        's_fname'           => $s_fname,
+                        's_lname'           => $s_lname,
+                        's_phone'           => $s_phone,
+                        's_email'           => $s_email,
+                        's_company'         => $s_company,
+                        's_country'         => $s_country,
+                        's_street'          => $s_street,
+                        's_suburb'          => $s_suburb,
+                        's_state'           => $s_state,
+                        's_postcode'        => $s_postcode,
+                        'subtotal'          => $postData['subtotal'],
+                        'coupon_code'       => session('sess_coupon_code'),
+                        'disc_type'         => session('sess_disc_type'),
+                        'disc_amount'       => $postData['disc_amount'],
+                        'amount_after_disc' => $postData['amount_after_disc'],
+                        'shipping_amt'      => $postData['shipping_amt'],
+                        'tax_amt'           => $postData['tax_amt'],
+                        'net_amt'           => $postData['net_amt'],
+                        'payment_mode'      => $payment_method,
+                        'checkout_type'     => $postData['checkout_type'],
+                    ];
+                    // Helper::pr($fields1);die;
+                    $order_id = Order::insertGetId($fields1);
+                    if($order_id){
+                        $fields2 = [
+                            'order_id'  => $order_id,
+                            'cust_id'   => (($uId != '')?$uId:0),
+                            'is_cart'   => 0,
+                            'status'    => 1,
+                        ];
+                        OrderDetail::where('cust_device_id', '=', $deviceId)->where('order_id', '=', 0)->where('is_cart', '=', 1)->update($fields2);
+                        // if($payment_method == 'CARD'){
+                        //     $request->session()->forget(['is_coupon', 'sess_coupon_code', 'sess_disc_type']);
+                        //     return redirect(url('pay-by-card/'.Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
+                        // } else {
+                        //     return redirect(url('pay-by-paypal/'.Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
+                        // }
+                    }
+                }
+            /* order place */
+            /* authorise.net payment process */
+                
+            /* authorise.net payment process */
         }
         public function payByCard(Request $request, $id){
             $id                             = Helper::decoded($id);

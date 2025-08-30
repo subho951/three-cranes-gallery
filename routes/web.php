@@ -30,7 +30,7 @@ use App\Http\Controllers\PayPalController;
         Route::match(['get', 'post'], 'cart-item-remove/{id1}', 'App\Http\Controllers\FrontController@cartItemRemove');
         Route::match(['get', 'post'], 'update-cart-item/{id1}', 'App\Http\Controllers\FrontController@updateCartItem');
         Route::match(['get', 'post'], 'checkout', 'App\Http\Controllers\FrontController@checkout');
-        Route::match(['get', 'post'], 'pay-by-card/{id1}', 'App\Http\Controllers\FrontController@payByCard');
+        Route::match(['get', 'post'], 'place-order', 'App\Http\Controllers\FrontController@placeOrder');
         Route::match(['get', 'post'], 'pay-by-paypal/{id1}', 'App\Http\Controllers\FrontController@payByPaypal');
         Route::match(['get', 'post'], 'order-success/{id1}', 'App\Http\Controllers\FrontController@orderSuccess');
         Route::match(['get', 'post'], 'order-failure/{id1}', 'App\Http\Controllers\FrontController@orderFailure');
