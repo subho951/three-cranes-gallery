@@ -30,5 +30,10 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'authorize' => [
+        'login_id' => env('AUTHORIZE_NET_API_LOGIN_ID'),
+        'transaction_key' => env('AUTHORIZE_NET_TRANSACTION_KEY'),
+        'env' => env('AUTHORIZE_NET_ENV', 'sandbox'),
+    ],
 
 ];

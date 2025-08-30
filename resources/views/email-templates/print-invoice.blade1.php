@@ -210,9 +210,7 @@ $generalSetting = GeneralSetting::find(1);
                     <?=$getOrderDetail->b_fname.' '.$getOrderDetail->b_lname?>
                     <?=$getOrderDetail->b_street?>, <?=$getOrderDetail->b_suburb?>
                     <?=$getOrderDetail->b_state?> <?=$getOrderDetail->b_postcode?>
-                    <?=$getOrderDetail->b_country?><br>
-                  	<?=$getOrderDetail->b_phone?><br>
-                  	<?=$getOrderDetail->b_email?>
+                    <?=$getOrderDetail->b_country?>
                 </p>
                 <b>Ship to
                 </b>
@@ -220,9 +218,7 @@ $generalSetting = GeneralSetting::find(1);
                   	<?=$getOrderDetail->s_fname.' '.$getOrderDetail->s_lname?>
                     <?=$getOrderDetail->s_street?>, <?=$getOrderDetail->s_suburb?>
                     <?=$getOrderDetail->s_state?> <?=$getOrderDetail->s_postcode?>
-                    <?=$getOrderDetail->s_country?><br>
-                  	<?=$getOrderDetail->s_phone?><br>
-                  	<?=$getOrderDetail->s_email?>
+                    <?=$getOrderDetail->s_country?>
                 </p>
                 <!--<div class="margin"></div>
                 <b>Scheduled to ship by
@@ -264,14 +260,14 @@ $generalSetting = GeneralSetting::find(1);
                       <tr>
                           <td style="width:10%">
                             <?php
-                            // $imageLink  = rawurlencode(url('public/uploads/product/' . (($getProduct)?$getProduct->cover_image:'')));
-                            // $resizeImageLink = 'https://res.cloudinary.com/ddv59fl2y/image/fetch/w_300/' . $imageLink;
-                            // $imageData = file_get_contents($resizeImageLink);
-                            // $generatedImage      = 'data:image/png;base64,' . base64_encode($imageData);
+                            $imageLink  = url('public/uploads/product/' . (($getProduct)?$getProduct->cover_image:''));
+                            $resizeImageLink = 'https://res.cloudinary.com/ddv59fl2y/image/fetch/w_300/' . $imageLink;
+                            $imageData = file_get_contents($resizeImageLink);
+                            $generatedImage      = 'data:image/png;base64,' . base64_encode($imageData);
                             // echo $html  = '<img src="' . $image . '" height="70" />';
                             ?>
-                            <!-- <img src="<?=$generatedImage?>" style="height:auto !important; width: 50px !important;" /> -->
-                            <img src="data:image/*;base64,<?php echo base64_encode(file_get_contents(base_path('public/uploads/product/' . (($getProduct)?$getProduct->cover_image:'')))); ?>"  height="70" />
+                            <img src="<?=$generatedImage?>" style="height:auto !important; width: 50px !important;" />
+                            <!-- <img src="data:image/*;base64,<?php echo base64_encode(file_get_contents(base_path('public/uploads/product/' . (($getProduct)?$getProduct->cover_image:'')))); ?>"  height="70" /> -->
                           </td>
                           <td>
                               <small><?=(($getProduct)?$getProduct->name:'')?></small>

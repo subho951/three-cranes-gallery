@@ -20,7 +20,7 @@
                             </div>
                             <div class="form-outline mb-3">
                                 <label class="form-label" for="signin_password">Password*</label>
-                                <input type="password" id="signin_password" placeholder="Enter Password" class="form-control form-control-lg" minlength="8" name="signin_password" />
+                                <input type="password" id="signin_password" placeholder="Enter Password" class="form-control form-control-lg" minlength="6" name="signin_password" />
                                 <span class="flex justify-around items-center"
                                     style="position: absolute; top: 43px; right: 18px;">
                                     

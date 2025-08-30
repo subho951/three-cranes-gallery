@@ -2,6 +2,9 @@
 namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\OpenAiAuth;
+use App\Services\AuthorizeNetService;
+use net\authorize\api\contract\v1 as AnetAPI;
+use net\authorize\api\controller as AnetController;
 use Illuminate\Http\Request;
 use PHPExperts\RESTSpeaker\RESTSpeaker;
 use Carbon\Carbon;
@@ -43,6 +46,10 @@ use Helper;
 use Hash;
 use stripe;
 use DB;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+date_default_timezone_set("Asia/Calcutta");
+
 class FrontController extends Controller
 {
     /* home */
@@ -479,17 +486,30 @@ class FrontController extends Controller
                     /* variation add */
                     $total                      = ($product_price * $product_qty);
                   	// shipping amount calculate
-                  		$ip_address = $_SERVER['REMOTE_ADDR'];
-                        $geopluginURL = "http://www.geoplugin.net/php.gp?ip=" . $ip_address;
-                        $addrDetailsArr = unserialize(file_get_contents($geopluginURL));
-
-                        if ($addrDetailsArr && isset($addrDetailsArr['geoplugin_countryName'])) {
-                            $country = $addrDetailsArr['geoplugin_countryName'];
-                        } else {
-                            $country = '';
+                        $country = '';
+                        $ip = $_SERVER['REMOTE_ADDR'];
+                        if ($ip == '::1' || $ip == '127.0.0.1') {
+                            $ip = '8.8.8.8'; // fallback
                         }
+
+                        $response = file_get_contents("http://ip-api.com/json/{$ip}");
+                        $data = json_decode($response, true);
+
+                        // echo "City: " . $data['city'] . ", Country: " . $data['country'];
+                        // die;
+                        $country = $data['country'];
+
+                  		// $ip_address = $_SERVER['REMOTE_ADDR'];
+                        // $geopluginURL = "http://www.geoplugin.net/php.gp?ip=" . $ip_address;
+                        // $addrDetailsArr = unserialize(file_get_contents($geopluginURL));
+
+                        // if ($addrDetailsArr && isset($addrDetailsArr['geoplugin_countryName'])) {
+                        //     $country = $addrDetailsArr['geoplugin_countryName'];
+                        // } else {
+                        //     $country = '';
+                        // }
                   		if($country != ''){
-                          if($country != 'USA' || $country != 'usa' || $country != 'US' || $country != 'us'){
+                          if($country != 'USA' || $country != 'usa' || $country != 'US' || $country != 'us' || $country != 'United States'){
                           	if($product_qty <= 1){
                              	$shipping_rate = $international_shipping_multiple_item; 
                             } else {
@@ -935,9 +955,11 @@ class FrontController extends Controller
             $page_name                      = 'checkout';
             echo $this->front_before_login_layout($title,$page_name,$data);
         }
-        public function placeOrder(Request $request){
+        public function placeOrder(Request $request, AuthorizeNetService $authorizeNet){
             $deviceId       = $this->createDeviceFingerprint();
             $postData       = $request->all();
+            $expiry         = explode('/', $postData['expiry']);
+            // Helper::pr($postData);
             /* order place */
                 if($postData['mode'] == 'order'){
                     $uId                            = session('user_id');
@@ -946,11 +968,11 @@ class FrontController extends Controller
                         $sl_no              = $getLastEnquiry->sl_no;
                         $next_sl_no         = $sl_no + 1;
                         $next_sl_no_string  = str_pad($next_sl_no, 7, 0, STR_PAD_LEFT);
-                        $order_no           = 'NK-'.$next_sl_no_string;
+                        $order_no           = 'TCG-'.$next_sl_no_string;
                     } else {
                         $next_sl_no         = 1;
                         $next_sl_no_string  = str_pad($next_sl_no, 7, 0, STR_PAD_LEFT);
-                        $order_no           = 'NK-'.$next_sl_no_string;
+                        $order_no           = 'TCG-'.$next_sl_no_string;
                     }
                     $payment_method = 'CARD';
                     
@@ -1048,8 +1070,140 @@ class FrontController extends Controller
                 }
             /* order place */
             /* authorise.net payment process */
-                
+                $getOrder = Order::where('id', '=', $order_id)->first();
+                $merchantAuthentication = new AnetAPI\MerchantAuthenticationType();
+                $merchantAuthentication->setName(config('services.authorize.login_id'));
+                $merchantAuthentication->setTransactionKey(config('services.authorize.transaction_key'));
+
+                // === Payment Information (from Accept.js opaqueData or raw card for test) ===
+                $creditCard = new AnetAPI\CreditCardType();
+                $creditCard->setCardNumber($request->card_number);
+                $creditCard->setExpirationDate($expiry[0] . "-" . $expiry[1]);
+                $creditCard->setCardCode($request->cvc);
+
+                $paymentOne = new AnetAPI\PaymentType();
+                $paymentOne->setCreditCard($creditCard);
+
+                // === CUSTOMER BILLING INFORMATION ===
+                $billTo = new AnetAPI\CustomerAddressType();
+                $billTo->setFirstName($this->sanitizeField((($getOrder)?$getOrder->b_fname:''), 50));
+                $billTo->setLastName($this->sanitizeField((($getOrder)?$getOrder->b_lname:''), 50));
+                $billTo->setCompany($this->sanitizeField((($getOrder)?$getOrder->b_company:''), 50));
+                $billTo->setAddress($this->sanitizeField((($getOrder)?$getOrder->b_street:''), 60));
+                $billTo->setCity($this->sanitizeField((($getOrder)?$getOrder->b_suburb:''), 40));
+                $billTo->setState($this->sanitizeField((($getOrder)?$getOrder->b_state:''), 40));
+                $billTo->setZip($this->sanitizeField((($getOrder)?$getOrder->b_postcode:''), 20));
+                $billTo->setCountry($this->sanitizeField((($getOrder)?$getOrder->b_country:''), 60));
+                $billTo->setPhoneNumber($this->sanitizeField((($getOrder)?$getOrder->b_phone:''), 25));
+                $billTo->setFaxNumber($this->sanitizeField((($getOrder)?$getOrder->b_phone:''), 25));
+
+                // === CUSTOMER SHIPPING INFORMATION ===
+                $shipTo = new AnetAPI\CustomerAddressType();
+                $shipTo->setFirstName($this->sanitizeField((($getOrder)?$getOrder->s_fname:''), 50));
+                $shipTo->setLastName($this->sanitizeField((($getOrder)?$getOrder->s_lname:''), 50));
+                $shipTo->setCompany($this->sanitizeField((($getOrder)?$getOrder->s_company:''), 50));
+                $shipTo->setAddress($this->sanitizeField((($getOrder)?$getOrder->s_street:''), 60));
+                $shipTo->setCity($this->sanitizeField((($getOrder)?$getOrder->s_suburb:''), 40));
+                $shipTo->setState($this->sanitizeField((($getOrder)?$getOrder->s_state:''), 40));
+                $shipTo->setZip($this->sanitizeField((($getOrder)?$getOrder->s_postcode:''), 20));
+                $shipTo->setCountry($this->sanitizeField((($getOrder)?$getOrder->s_country:''), 60));
+                // $shipTo->setPhoneNumber($this->sanitizeField((($getOrder)?$getOrder->s_phone:''), 25));
+                // $shipTo->setFaxNumber($this->sanitizeField((($getOrder)?$getOrder->s_phone:''), 25));
+
+                // === ADDITIONAL INFORMATION ===
+                $order = new AnetAPI\OrderType();
+                $order->setInvoiceNumber((($getOrder)?$getOrder->order_no:''));
+                $order->setDescription((($getOrder)?$getOrder->id:''));
+
+                // Taxes, Duty, Freight, PO Number
+                $transactionRequest = new AnetAPI\TransactionRequestType();
+                $transactionRequest->setTransactionType("authCaptureTransaction"); // charge
+                $transactionRequest->setAmount($request->net_amt);
+                $transactionRequest->setPayment($paymentOne);
+                $transactionRequest->setBillTo($billTo);
+                $transactionRequest->setShipTo($shipTo);
+                $transactionRequest->setOrder($order);
+                $transactionRequest->setTax(new AnetAPI\ExtendedAmountType(['amount' => $request->tax_amt, 'name' => 'Sales Tax']));
+                $transactionRequest->setDuty(new AnetAPI\ExtendedAmountType(['amount' => 0.00, 'name' => 'Duty Fee']));
+                // $transactionRequest->setFreight(new AnetAPI\ExtendedAmountType(['amount' => 0.00, 'name' => 'Shipping']));
+                // $transactionRequest->setTaxExempt(false);
+                // $transactionRequest->setPoNumber("");
+
+                // Wrap it inside a CreateTransactionRequest
+                $request = new AnetAPI\CreateTransactionRequest();
+                $request->setMerchantAuthentication($merchantAuthentication);
+                $request->setTransactionRequest($transactionRequest);
+
+                // Execute
+                $controller = new AnetController\CreateTransactionController($request);
+                $response = $controller->executeWithApiResponse(\net\authorize\api\constants\ANetEnvironment::SANDBOX);
+
+                // Helper::pr($response);
+
+                // Get Transaction ID
+                if ($response != null && $response->getMessages()->getResultCode() == "Ok") {
+                    $tresponse = $response->getTransactionResponse();
+                    if ($tresponse != null && $tresponse->getMessages() != null) {
+                        // echo "Transaction ID: " . $tresponse->getTransId() . "\n";
+                        $paymentFields = [
+                            'payment_status'    => 1,
+                            'payment_txn_no'    => $tresponse->getTransId(),
+                            'payment_date_time' => date('Y-m-d H:i:s'),
+                        ];
+                        Order::where('id', '=', $order_id)->update($paymentFields);
+
+                        $getOrder   = DB::table('orders')
+                                        ->join('users', 'orders.cust_id', '=', 'users.id')
+                                        ->select('orders.*', 'users.first_name', 'users.last_name', 'users.email')
+                                        ->where('orders.cust_id', '=', $uId)
+                                        ->where('orders.id', '=', $order_id)
+                                        ->first();
+                        /* generate inspection pdf & save it to directory */
+                            $enquiry_no                     = (($getOrder)?$getOrder->order_no:'');
+                            $data['generalSetting']         = GeneralSetting::find('1');
+                            $data['getOrderDetail']         = $getOrder;
+                            $subject                        = $data['generalSetting']->site_name . ' Invoice' . $enquiry_no;
+                            $message                        = view('email-templates.print-invoice',$data);
+                            $options    = new Options();
+                            $options->set('defaultFont', 'Courier');
+                            $dompdf     = new Dompdf($options);
+                            $html       = $message;
+                            $dompdf->loadHtml($html);
+                            $dompdf->setPaper('A4', 'portrait');
+                            $dompdf->render();
+                            $output = $dompdf->output();
+                            // $dompdf->stream("document.pdf", array("Attachment" => false));die;
+                            $filename   = $enquiry_no.'.pdf';
+                            $pdfFilePath = 'public/uploads/orders/' . $filename;
+                            file_put_contents($pdfFilePath, $output);
+                            Order::where('id', '=', $order_id)->update(['invoice_pdf' => $filename]);
+                        /* generate inspection pdf & save it to directory */
+                        /* email functionality */
+                            $mailData['getOrder']       = Order::where('id', '=', $order_id)->first();
+                            $message                    = view('email-templates.order-place', $mailData);                    
+                            $generalSetting             = GeneralSetting::find('1');
+                            $subject                    = 'Order Confirmation - Your Order with '.$generalSetting->site_name.' ['.$mailData['getOrder']->order_no.'] has been successfully placed!';
+                            $this->sendMail($generalSetting->system_email, $subject, $message);
+                            $this->sendMail((($getOrder)?$getOrder->cust_email:''), $subject, $message);
+                        /* email functionality */
+                        /* email log save */
+                            $postData2 = [
+                                'name'                  => $mailData['getOrder']->b_fname.' '.$mailData['getOrder']->b_lname,
+                                'email'                 => $mailData['getOrder']->cust_email,
+                                'subject'               => $subject,
+                                'message'               => $message
+                            ];
+                            EmailLog::insertGetId($postData2);
+                        /* email log save */
+                        return redirect(url('order-success/'.Helper::encoded($order_id)))->with('success_message', 'Order placed & payment has been successfully completed !!!');
+                    } else {
+                        // echo "Transaction Failed\n";
+                    }
+                }
             /* authorise.net payment process */
+        }
+        public function sanitizeField($value, $maxLength) {
+            return substr($value ?? '', 0, $maxLength);
         }
         public function payByCard(Request $request, $id){
             $id                             = Helper::decoded($id);
