@@ -41,6 +41,8 @@ use Helper;
 use Hash;
 use stripe;
 use DB;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class PayPalController extends Controller
 {
@@ -149,6 +151,32 @@ class PayPalController extends Controller
             // Helper::pr($userSubscriptionData);
             Order::where('id', '=', $id)->update($userSubscriptionData);
             OrderDetail::where('order_id', '=', $id)->update(['is_cart' => 0]);
+            $order_id = $id;
+            $getOrder   = DB::table('orders')
+                                    ->join('users', 'orders.cust_id', '=', 'users.id')
+                                    ->select('orders.*', 'users.first_name', 'users.last_name', 'users.email')
+                                    ->where('orders.id', '=', $order_id)
+                                    ->first();
+            /* generate inspection pdf & save it to directory */
+                $enquiry_no                     = (($getOrder)?$getOrder->order_no:'');
+                $data['generalSetting']         = GeneralSetting::find('1');
+                $data['getOrderDetail']         = $getOrder;
+                $subject                        = $data['generalSetting']->site_name . ' Invoice' . $enquiry_no;
+                $message                        = view('email-templates.print-invoice',$data);
+                $options    = new Options();
+                $options->set('defaultFont', 'Courier');
+                $dompdf     = new Dompdf($options);
+                $html       = $message;
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                $output = $dompdf->output();
+                // $dompdf->stream("document.pdf", array("Attachment" => false));die;
+                $filename   = $enquiry_no.'.pdf';
+                $pdfFilePath = 'public/uploads/orders/' . $filename;
+                file_put_contents($pdfFilePath, $output);
+                Order::where('id', '=', $order_id)->update(['invoice_pdf' => $filename]);
+            /* generate inspection pdf & save it to directory */
 
             /* email functionality */
                 $mailData['getOrder']       = Order::where('id', '=', $id)->first();

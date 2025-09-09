@@ -242,8 +242,28 @@ function formatCartItems($items)
                             </div>
                         </div>
                         <div id="payment" class="checkout-payment">
+                            <ul class=" payment_methods methods">
+                                <li class=" payment_method_authorize">
+                                    <input id="payment_method_authorize" type="radio" class="input-radio" name="payment_method" value="AUTHORIZE.NET" data-order_button_text="Proceed to Card" checked required>
+                                    <label for="payment_method_authorize">Pay By Authorize.Net</label>
+                                </li>
+                                <li class=" payment_method_cheque">
+                                    <input id="payment_method_cheque" type="radio" class="input-radio" name="payment_method" value="STRIPE" data-order_button_text="Proceed to Card" required>
+                                    <label for="payment_method_cheque">Pay By Stripe</label>
+                                </li>
+                                <li class=" payment_method_paypal">
+                                    <input id="payment_method_paypal" type="radio" class="input-radio" name="payment_method" value="PAYPAL" data-order_button_text="Proceed to PayPal" required>
+                                    <label for="payment_method_paypal">
+                                    Pay By PayPal</label>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="payment" class="checkout-payment">
                             <div class="form-row place-order">
-                                <button type="button" class="button btn-place-order common-btn" data-bs-toggle="modal" data-bs-target="#pay">Pay &amp; Place order</button></div>
+                                <button type="button" id="authorize_div" class="button btn-place-order common-btn payment-box" data-bs-toggle="modal" data-bs-target="#pay">Pay By Authorize.Net &amp; Place Order</button>
+                                <button type="submit" id="stripe_div" class="button btn-place-order common-btn payment-box" style="display: none;">Pay By Stripe &amp; Place Order</button>
+                                <button type="submit" id="paypal_div" class="button btn-place-order common-btn payment-box" style="display: none;">Pay By PayPal &amp; Place Order</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -290,22 +310,22 @@ function formatCartItems($items)
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3">
-                                        <input placeholder="Card Number" class="form-control" maxlength="16" minlength="16" type="text" name="card_number" required>
+                                        <input placeholder="Card Number" class="form-control" maxlength="16" minlength="16" type="text" name="card_number" id="card_number" required>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3">
-                                        <input placeholder="Card Name" class="form-control" type="text" name="name" required>
+                                        <input placeholder="Card Name" class="form-control" type="text" name="name" id="card_name" required>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
-                                        <input placeholder="MM/YYYY" class="form-control" name="expiry" required>
+                                        <input placeholder="MM/YYYY" class="form-control" name="expiry" id="expiry" required>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
-                                        <input placeholder="CVC" class="form-control" maxlength="3" minlength="3" type="password" name="cvc" required>
+                                        <input placeholder="CVC" class="form-control" maxlength="3" minlength="3" type="password" name="cvc" id="cvc" required>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 text-end">
@@ -403,6 +423,7 @@ function formatCartItems($items)
     </div>
 </div>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMbNCogNokCwVmJCRfefB6iCYUWv28LjQ&libraries=places&callback=initAutocomplete&libraries=places&v=weekly"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     // Elements in preview card
@@ -451,6 +472,42 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // keep cursor at right place
         this.selectionEnd = cursorPos + (formatted.length - this.value.length);
+    });
+});
+$(document).ready(function () {
+    $('input[name="payment_method"]').on('change', function () {
+        // Hide all
+        $('.payment-box').hide();
+
+        // Show based on selected
+        if ($(this).val() === 'AUTHORIZE.NET') {
+            $('#authorize_div').show();
+            $('#stripe_div').hide();
+            $('#paypal_div').hide();
+
+            $('#card_number').attr('required', true);
+            $('#card_name').attr('required', true);
+            $('#expiry').attr('required', true);
+            $('#cvc').attr('required', true);
+        } else if ($(this).val() === 'STRIPE') {
+            $('#authorize_div').hide();
+            $('#stripe_div').show();
+            $('#paypal_div').hide();
+
+            $('#card_number').attr('required', false);
+            $('#card_name').attr('required', false);
+            $('#expiry').attr('required', false);
+            $('#cvc').attr('required', false);
+        } else if ($(this).val() === 'PAYPAL') {
+            $('#authorize_div').hide();
+            $('#stripe_div').hide();
+            $('#paypal_div').show();
+
+            $('#card_number').attr('required', false);
+            $('#card_name').attr('required', false);
+            $('#expiry').attr('required', false);
+            $('#cvc').attr('required', false);
+        }
     });
 });
 </script>

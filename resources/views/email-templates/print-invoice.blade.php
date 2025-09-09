@@ -264,14 +264,18 @@ $generalSetting = GeneralSetting::find(1);
                       <tr>
                           <td style="width:10%">
                             <?php
-                            // $imageLink  = rawurlencode(url('public/uploads/product/' . (($getProduct)?$getProduct->cover_image:'')));
-                            // $resizeImageLink = 'https://res.cloudinary.com/ddv59fl2y/image/fetch/w_300/' . $imageLink;
-                            // $imageData = file_get_contents($resizeImageLink);
-                            // $generatedImage      = 'data:image/png;base64,' . base64_encode($imageData);
-                            // echo $html  = '<img src="' . $image . '" height="70" />';
+                            $url = env('UPLOADS_URL').'product/'.(($getProduct)?$getProduct->cover_image:'');
+                            $headers = @get_headers($url);
+                            if ($headers && strpos($headers[0], '200')) {
+                                $imageLink        = rawurlencode(env('UPLOADS_URL').'product/'.(($getProduct)?$getProduct->cover_image:''));
+                                $resizeImageLink  = 'https://res.cloudinary.com/ddv59fl2y/image/fetch/w_300/' . $imageLink;
+                                $imageData        = file_get_contents($resizeImageLink);
+                                $generatedImage   = 'data:image/png;base64,' . base64_encode($imageData);
+                                echo $html        = '<img src="' . $generatedImage . '" style="height:auto !important; width: 50px !important;" class="img-fluid" alt="<?=$getProduct->name?>" />';
+                            } else {
                             ?>
-                            <!-- <img src="<?=$generatedImage?>" style="height:auto !important; width: 50px !important;" /> -->
-                            <img src="data:image/*;base64,<?php echo base64_encode(file_get_contents(base_path('public/uploads/product/' . (($getProduct)?$getProduct->cover_image:'')))); ?>"  height="70" />
+                                <img src="<?=env('UPLOADS_URL').'product/'.(($getProduct)?$getProduct->cover_image:'')?>" style="height:auto !important; width: 50px !important;" class="img-fluid" alt="<?=$getProduct->name?>">
+                            <?php } ?>
                           </td>
                           <td>
                               <small><?=(($getProduct)?$getProduct->name:'')?></small>

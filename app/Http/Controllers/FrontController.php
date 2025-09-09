@@ -1047,8 +1047,8 @@ class FrontController extends Controller
                         'shipping_amt'      => $postData['shipping_amt'],
                         'tax_amt'           => $postData['tax_amt'],
                         'net_amt'           => $postData['net_amt'],
-                        'payment_mode'      => $payment_method,
-                        'checkout_type'     => $postData['checkout_type'],
+                        'payment_mode'      => $postData['payment_method'],
+                        'checkout_type'     => 'EXISTING',
                     ];
                     // Helper::pr($fields1);die;
                     $order_id = Order::insertGetId($fields1);
@@ -1060,12 +1060,12 @@ class FrontController extends Controller
                             'status'    => 1,
                         ];
                         OrderDetail::where('cust_device_id', '=', $deviceId)->where('order_id', '=', 0)->where('is_cart', '=', 1)->update($fields2);
-                        // if($payment_method == 'CARD'){
-                        //     $request->session()->forget(['is_coupon', 'sess_coupon_code', 'sess_disc_type']);
-                        //     return redirect(url('pay-by-card/'.Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
-                        // } else {
-                        //     return redirect(url('pay-by-paypal/'.Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
-                        // }
+                        if($postData['payment_method'] == 'STRIPE'){
+                            $request->session()->forget(['is_coupon', 'sess_coupon_code', 'sess_disc_type']);
+                            return redirect(url('pay-by-card/'.Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
+                        } elseif($postData['payment_method'] == 'PAYPAL'){
+                            return redirect(url('pay-by-paypal/'.Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
+                        }
                     }
                 }
             /* order place */
@@ -1357,9 +1357,9 @@ class FrontController extends Controller
                 'currency'              => $retrievedPaymentIntent->currency,
                 'particulars'           => $retrievedPaymentIntent->description,
                 'amount'                => ($retrievedPaymentIntent->amount / 100),
-                'card_last_4_digits'    => $retrievedPaymentIntent->payment_method_details->card->last4,
-                'expiry_month'          => $retrievedPaymentIntent->payment_method_details->card->exp_month,
-                'expiry_year'           => $retrievedPaymentIntent->payment_method_details->card->exp_year,
+                // 'card_last_4_digits'    => $retrievedPaymentIntent->payment_method_details->card->last4,
+                // 'expiry_month'          => $retrievedPaymentIntent->payment_method_details->card->exp_month,
+                // 'expiry_year'           => $retrievedPaymentIntent->payment_method_details->card->exp_year,
             ];
             if($stripeData['status']){
                 $userSubscriptionData = [
@@ -1371,13 +1371,40 @@ class FrontController extends Controller
                     'customer_card_id'              => $stripeData['customer_card_id'],
                     'currency'                      => $stripeData['currency'],
                     'particulars'                   => $stripeData['particulars'],
-                    'card_last_4_digits'            => $stripeData['card_last_4_digits'],
-                    'expiry_month'                  => $stripeData['expiry_month'],
-                    'expiry_year'                   => $stripeData['expiry_year'],
+                    // 'card_last_4_digits'            => $stripeData['card_last_4_digits'],
+                    // 'expiry_month'                  => $stripeData['expiry_month'],
+                    // 'expiry_year'                   => $stripeData['expiry_year'],
                 ];
                 // Helper::pr($stripeData);
                 Order::where('id', '=', $order_id)->update($userSubscriptionData);
                 OrderDetail::where('order_id', '=', $order_id)->update(['is_cart' => 0]);
+
+                $getOrder   = DB::table('orders')
+                                        ->join('users', 'orders.cust_id', '=', 'users.id')
+                                        ->select('orders.*', 'users.first_name', 'users.last_name', 'users.email')
+                                        ->where('orders.id', '=', $order_id)
+                                        ->first();
+                /* generate inspection pdf & save it to directory */
+                    $enquiry_no                     = (($getOrder)?$getOrder->order_no:'');
+                    $data['generalSetting']         = GeneralSetting::find('1');
+                    $data['getOrderDetail']         = $getOrder;
+                    $subject                        = $data['generalSetting']->site_name . ' Invoice' . $enquiry_no;
+                    $message                        = view('email-templates.print-invoice',$data);
+                    $options    = new Options();
+                    $options->set('defaultFont', 'Courier');
+                    $dompdf     = new Dompdf($options);
+                    $html       = $message;
+                    $dompdf->loadHtml($html);
+                    $dompdf->setPaper('A4', 'portrait');
+                    $dompdf->render();
+                    $output = $dompdf->output();
+                    // $dompdf->stream("document.pdf", array("Attachment" => false));die;
+                    $filename   = $enquiry_no.'.pdf';
+                    $pdfFilePath = 'public/uploads/orders/' . $filename;
+                    file_put_contents($pdfFilePath, $output);
+                    Order::where('id', '=', $order_id)->update(['invoice_pdf' => $filename]);
+                /* generate inspection pdf & save it to directory */
+
                 /* email functionality */
                     $mailData['getOrder']       = Order::where('id', '=', $order_id)->first();
                     $message                    = view('email-templates.order-place', $mailData);                    
