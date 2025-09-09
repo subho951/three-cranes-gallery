@@ -130,7 +130,7 @@ function formatCartItems($items)
                                         <th style="border: 1px solid #eee;" scope="row"><?= $sl++ ?></th>
                                         <td style="border: 1px solid #eee;">
                                             <div class="order-thumble-img">
-                                                <a target="_blank" href="<?= url('products/' . (($getProduct) ? $getProduct->slug : '')) ?>"><img class="w-100" src="<?= env('UPLOADS_URL') . 'product/' . $getProduct->cover_image ?>" alt="<?= $getProduct->name ?>"></a>
+                                                <a target="_blank" href="<?= url('products/' . (($getProduct) ? $getProduct->slug : '')) ?>"><img width="100" height="100" src="<?= env('UPLOADS_URL') . 'product/' . $getProduct->cover_image ?>" alt="<?= $getProduct->name ?>"></a>
                                             </div>
                                             <div>
                                                 <h5 class="text-truncate font-size-14 mb-0"><a target="_blank" href="<?= url('products/' . (($getProduct) ? $getProduct->slug : '')) ?>"><?= $getProduct->name ?></a></h5>

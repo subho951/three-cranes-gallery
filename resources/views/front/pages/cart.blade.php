@@ -3,6 +3,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\Faq;
+use App\Models\GeneralSetting;
 use App\Helpers\Helper;
 function formatCartItems($items) {
     $output = "";
@@ -65,50 +66,55 @@ function formatCartItems($items) {
                             $parent_id_val       = json_decode($cartItem->parent_id_val);
                             $child_id_val        = json_decode($cartItem->child_id_val);
                             ?>
-                                <form method="POST" name="cart<?=$cartItem->id?>" action="<?=url('update-cart-item/'.Helper::encoded($cartItem->id))?>">
-                                @csrf
-                                    <tr class="cart_item">
-                                        <td class="product-thumbnail">
-                                            <a href="<?=url('product/'.(($getProduct)?$getProduct->slug:''))?>" class="d-flex align-items-center">
-                                                <div class="cart-product-img">
-                                                    <img src="<?=env('UPLOADS_URL').'product/'.(($getProduct)?$getProduct->cover_image:'')?>" alt="<?=(($getProduct)?$getProduct->name:'')?>">
-                                                </div>
-                                                <div class="product-name ms-2">
-                                                    <?=(($getProduct)?$getProduct->name:'')?>    
-                                                    <span class="varietion"><?=$cartItem->variation_name?></span>
-                                                </div>
-                                            </a>
-                                        </td>
-                                        <td class="product-price">
-                                            <span class=" amount">
-                                                <bdi><span class="currencySymbol">$</span><?=number_format($cartItem->rate,2)?></bdi>
-                                            </span>
-                                        </td>
-                                        <td class="product-quantity">
+                                <tr class="cart_item">
+                                    <td class="product-thumbnail">
+                                        <a href="<?=url('product/'.(($getProduct)?$getProduct->slug:''))?>" class="d-flex align-items-center">
+                                            <div class="cart-product-img">
+                                                <img src="<?=env('UPLOADS_URL').'product/'.(($getProduct)?$getProduct->cover_image:'')?>" alt="<?=(($getProduct)?$getProduct->name:'')?>">
+                                            </div>
+                                            <div class="product-name ms-2">
+                                                <?=(($getProduct)?$getProduct->name:'')?>    
+                                                <span class="varietion"><?=$cartItem->variation_name?></span>
+                                            </div>
+                                        </a>
+                                    </td>
+                                    <td class="product-price">
+                                        <span class=" amount">
+                                            <bdi><span class="currencySymbol">$</span><?=number_format($cartItem->rate,2)?></bdi>
+                                        </span>
+                                    </td>
+                                    <td class="product-quantity">
+                                        <form method="POST" name="cart<?=$cartItem->id?>" action="<?=url('update-cart-item/'.Helper::encoded($cartItem->id))?>">
+                                            @csrf
                                             <div class="qty-input quantity">
                                                 <?php if($cartItem->qty > 1){?>
-                                                    <button class="qty-count qty-count--minus minus" data-action="minus" type="button" onclick="incrementDecrementQty(<?=$cartItem->qty?>);">-</button>
+                                                    <button class="qty-count qty-count--minus minus" data-action="minus" type="submit" onclick="incrementDecrementQty(<?=$cartItem->qty?>);">-</button>
                                                 <?php }?>
-                                                <input class="product-qty" min="0" max="10" readonly type="text" value="<?=$cartItem->qty?>" name="product-qty">
-                                                <button class="qty-count qty-count--add plus" data-action="add" type="button" onclick="incrementDecrementQty(<?=$cartItem->qty?>);">+</button></div>
-                                        </td>
-                                        <td class="product-subtotal" data-title="Subtotal">
-                                            <span class="amount">
-                                                <bdi><span class="currencySymbol">$</span><?=number_format($cartItem->disc_amount,2)?></bdi>
-                                            </span>
-                                        </td>
-                                        <td class="product-subtotal" data-title="Subtotal">
-                                            <span class="amount">
-                                                <bdi><span class="currencySymbol">$</span><?=number_format($cartItem->subtotal,2)?></bdi>
-                                            </span>
-                                        </td>
-                                        <td class="product-remove">
-                                            <a href="<?=url('cart-item-remove/'.Helper::encoded($cartItem->id))?>" onclick="return confirm('Do you want to remove this item from cart ?');">
-                                                <button class="remove"><i class="fa-solid fa-trash"></i> Remove</button>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </form>
+                                                <!-- <input class="product-qty" min="0" max="10" readonly type="text" value="<?=$cartItem->qty?>" name="product-qty"> -->
+
+                                                <input class="product-qty" type="number" name="qty" min="0" max="10" value="<?= $cartItem->qty ?>" readonly>
+
+                                                <button class="qty-count qty-count--add plus" data-action="add" type="submit" onclick="incrementDecrementQty(<?=$cartItem->qty?>);">+</button>
+
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td class="product-subtotal" data-title="Subtotal">
+                                        <span class="amount">
+                                            <bdi><span class="currencySymbol">$</span><?=number_format($cartItem->disc_amount,2)?></bdi>
+                                        </span>
+                                    </td>
+                                    <td class="product-subtotal" data-title="Subtotal">
+                                        <span class="amount">
+                                            <bdi><span class="currencySymbol">$</span><?=number_format($cartItem->subtotal,2)?></bdi>
+                                        </span>
+                                    </td>
+                                    <td class="product-remove">
+                                        <a href="<?=url('cart-item-remove/'.Helper::encoded($cartItem->id))?>" onclick="return confirm('Do you want to remove this item from cart ?');">
+                                            <button class="remove"><i class="fa-solid fa-trash"></i> Remove</button>
+                                        </a>
+                                    </td>
+                                </tr>
                             <?php } } else {?>
                                 <tr>
                                     <td colspan="5" style="color: red; text-align: center; font-weight: bold;">No Cart Items Found !</td>
@@ -158,7 +164,12 @@ function formatCartItems($items) {
                                 </div>
                             </div>
                             <div class="cart-subtotal mb-2">
-                                <div class="title">Shipping</div>
+                                <div class="title">Shipping<br>
+                                    <small style="font-size: 12px;color: #8b2525;font-weight: bold;">Domestic $9/item (single)</small><br>
+                                    <small style="font-size: 12px;color: #8b2525;font-weight: bold;">Domestic $6/item (multiple)</small><br>
+                                    <small style="font-size: 12px;color: #8b2525;font-weight: bold;">International $40/item (single)</small><br>
+                                    <small style="font-size: 12px;color: #8b2525;font-weight: bold;">International $25/item (multiple)</small>
+                                </div>
                                 <div data-title="Subtotal" class="text-end">
                                     <span class="amount">
                                         <bdi><span class="Price-currencySymbol">$ </span><?=number_format($shipping_tot,2)?></bdi>
@@ -166,7 +177,9 @@ function formatCartItems($items) {
                                 </div>
                             </div>
                             <div class="cart-subtotal">
-                                <div class="title">Tax</div>
+                                <div class="title">Tax<br>
+                                    <small style="font-size: 12px;color: #8b2525;font-weight: bold;">(@ <?=$generalSetting->tax_percent?>%)</small>
+                                </div>
                                 <div data-title="Subtotal" class="text-end">
                                     <span class="amount">
                                         <bdi><span class="Price-currencySymbol">$ </span><?=number_format($tax_tot,2)?></bdi>
@@ -199,7 +212,7 @@ function formatCartItems($items) {
     </div>
 </section>
 <script type="text/javascript">
-   function incrementDecrementQty(id){
-      document.getElementById('cart' + id).submit();
-   }
+    function incrementDecrementQty(id){
+        document.getElementById('cart' + id).submit();
+    }
 </script>

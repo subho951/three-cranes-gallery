@@ -495,29 +495,17 @@ class FrontController extends Controller
                         $response = file_get_contents("http://ip-api.com/json/{$ip}");
                         $data = json_decode($response, true);
 
-                        // echo "City: " . $data['city'] . ", Country: " . $data['country'];
-                        // die;
                         $country = $data['country'];
-
-                  		// $ip_address = $_SERVER['REMOTE_ADDR'];
-                        // $geopluginURL = "http://www.geoplugin.net/php.gp?ip=" . $ip_address;
-                        // $addrDetailsArr = unserialize(file_get_contents($geopluginURL));
-
-                        // if ($addrDetailsArr && isset($addrDetailsArr['geoplugin_countryName'])) {
-                        //     $country = $addrDetailsArr['geoplugin_countryName'];
-                        // } else {
-                        //     $country = '';
-                        // }
                   		if($country != ''){
                           if($country != 'USA' || $country != 'usa' || $country != 'US' || $country != 'us' || $country != 'United States'){
-                          	if($product_qty <= 1){
+                          	if($product_qty > 1){
                              	$shipping_rate = $international_shipping_multiple_item; 
                             } else {
                              	$shipping_rate = $international_shipping_single_item; 
                             }
                           	$shipping_amt = ($product_qty * $shipping_rate);
                           } else {
-                            if($product_qty <= 1){
+                            if($product_qty > 1){
                              	$shipping_rate = $domestic_shipping_single_item; 
                             } else {
                              	$shipping_rate = $domestic_shipping_multiple_item; 
@@ -525,7 +513,7 @@ class FrontController extends Controller
                           	$shipping_amt = ($product_qty * $shipping_rate);
                           }
                         } else {
-                        	if($product_qty <= 1){
+                        	if($product_qty > 1){
                              	$shipping_rate = $domestic_shipping_single_item; 
                             } else {
                              	$shipping_rate = $domestic_shipping_multiple_item; 
@@ -884,13 +872,56 @@ class FrontController extends Controller
             $postData       = $request->all();
             $id             = Helper::decoded($id);
             $checkProductInCart = OrderDetail::where('id', '=', $id)->first();
-            $generalSetting = GeneralSetting::find('1');
-            $shipping_charge_percent = $generalSetting->shipping_charge_percent;
-            $tax_percent    = $generalSetting->tax_percent;
+
+            $generalSetting                             = GeneralSetting::find('1');
+
+            $tax_percent                                = $generalSetting->tax_percent;
+            $domestic_free_shipping_min_amount          = $generalSetting->domestic_free_shipping_min_amount;
+            $domestic_shipping_single_item              = $generalSetting->domestic_shipping_single_item;
+            $domestic_shipping_multiple_item            = $generalSetting->domestic_shipping_multiple_item;
+            $international_shipping_single_item         = $generalSetting->international_shipping_single_item;
+            $international_shipping_multiple_item       = $generalSetting->international_shipping_multiple_item;
+
+            // shipping amount calculate
+                $country = '';
+                $ip = $_SERVER['REMOTE_ADDR'];
+                if ($ip == '::1' || $ip == '127.0.0.1') {
+                    $ip = '8.8.8.8'; // fallback
+                }
+
+                $response = file_get_contents("http://ip-api.com/json/{$ip}");
+                $data = json_decode($response, true);
+
+                $country = $data['country'];
+                if($country != ''){
+                    if($country != 'USA' || $country != 'usa' || $country != 'US' || $country != 'us' || $country != 'United States'){
+                    if($postData['qty'] > 1){
+                        $shipping_rate = $international_shipping_multiple_item; 
+                    } else {
+                        $shipping_rate = $international_shipping_single_item; 
+                    }
+                    $shipping_amt = ($postData['qty'] * $shipping_rate);
+                    } else {
+                    if($postData['qty'] > 1){
+                        $shipping_rate = $domestic_shipping_single_item; 
+                    } else {
+                        $shipping_rate = $domestic_shipping_multiple_item; 
+                    }
+                    $shipping_amt = ($postData['qty'] * $shipping_rate);
+                    }
+                } else {
+                    if($postData['qty'] > 1){
+                        $shipping_rate = $domestic_shipping_single_item; 
+                    } else {
+                        $shipping_rate = $domestic_shipping_multiple_item; 
+                    }
+                    $shipping_amt = ($postData['qty'] * $shipping_rate);
+                }
+            // shipping amount calculate
+            $total                      = ($checkProductInCart->rate * $postData['qty']);
+            $tax_amt                    = (($total * $tax_percent)/100);
+            $net_amt                    = ($total + $shipping_amt + $tax_amt);
             
-            $total          = ($checkProductInCart->rate * $postData['qty']);
-            $shipping_amt   = (($total * $shipping_charge_percent)/100);
-            $tax_amt        = (($total * $tax_percent)/100);
             $net_amt        = ($total + $shipping_amt + $tax_amt);
             $fields = [
                 'qty'               => $postData['qty'],

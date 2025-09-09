@@ -131,7 +131,14 @@ function formatCartItems($items)
                      </div>
                   </div>
                   <div class="cart-subtotal-list shipping-totals">
-                     <h2>Shipping</h2>
+                     <h2>
+                        Shipping
+                        <br>
+                        <small style="font-size: 12px;color: #8b2525;font-weight: bold;">Domestic $9/item (single)</small><br>
+                        <small style="font-size: 12px;color: #8b2525;font-weight: bold;">Domestic $6/item (multiple)</small><br>
+                        <small style="font-size: 12px;color: #8b2525;font-weight: bold;">International $40/item (single)</small><br>
+                        <small style="font-size: 12px;color: #8b2525;font-weight: bold;">International $25/item (multiple)</small>
+                     </h2>
                      <div class="subtotal-price">
                         <span class="Price-amount amount">
                            <bdi><span class="Price-currencySymbol">$</span><?=number_format($shipping_tot,2)?></span></bdi>
@@ -140,7 +147,10 @@ function formatCartItems($items)
                      </div>
                   </div>
                   <div class="cart-subtotal-list shipping-totals">
-                     <h2>Tax</h2>
+                     <h2>Tax
+                        <br>
+                        <small style="font-size: 12px;color: #8b2525;font-weight: bold;">(@ <?=$generalSetting->tax_percent?>%)</small>
+                     </h2>
                      <div class="subtotal-price">
                         <span class="Price-amount amount">
                            <bdi><span class="Price-currencySymbol">$</span><?= number_format($tax_tot, 2) ?></bdi>
