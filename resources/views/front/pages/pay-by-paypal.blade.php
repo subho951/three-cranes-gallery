@@ -24,6 +24,52 @@ function formatCartItems($items) {
     return $output;
 }
 ?>
+<!-- CSS -->
+<style>
+    .info-icon {
+        display: inline-block;
+        margin-left: 5px;
+        color: #ffffff;
+        cursor: pointer;
+        font-size: 14px;
+        border: 1px solid #000318;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        text-align: center;
+        line-height: 16px;
+        font-weight: bold;
+        background: #000318;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-content {
+        background: #fff;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 300px;
+        position: relative;
+    }
+
+    .close {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+</style>
 <section class="single-page-banner-section" style="background-image: url('<?=url('public/uploads/Pay-By-Card.png')?>')">
    <div class="background-overlay"></div>
    <div class=" container-xxl container-xl container-lg container-md container-sm container">
@@ -102,11 +148,7 @@ function formatCartItems($items) {
                      <div class="cart-subtotal-list shipping-totals">
                         <h2>
                            Shipping
-                           <br>
-                           <small style="font-size: 12px;color: #8b2525;font-weight: bold;">Domestic $9/item (single)</small><br>
-                           <small style="font-size: 12px;color: #8b2525;font-weight: bold;">Domestic $6/item (multiple)</small><br>
-                           <small style="font-size: 12px;color: #8b2525;font-weight: bold;">International $40/item (single)</small><br>
-                           <small style="font-size: 12px;color: #8b2525;font-weight: bold;">International $25/item (multiple)</small>
+                           <span class="info-icon" onclick="openModal('shippingInfo')">i</span>
                         </h2>
                         <div class="subtotal-price">
                            <span class="Price-amount amount">
@@ -117,8 +159,7 @@ function formatCartItems($items) {
                      </div>
                      <div class="cart-subtotal-list shipping-totals">
                         <h2>Tax
-                           <br>
-                           <small style="font-size: 12px;color: #8b2525;font-weight: bold;">(@ <?=$generalSetting->tax_percent?>%)</small>
+                           <span class="info-icon" onclick="openModal('taxInfo')">i</span>
                         </h2>
                         <div class="subtotal-price">
                            <span class="Price-amount amount">
@@ -146,6 +187,27 @@ function formatCartItems($items) {
          </div>
    </div>
 </section>
+
+<!-- Modal Structure -->
+<div id="shippingInfo" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('shippingInfo')">&times;</span>
+        <h5>Shipping Information</h5>
+        <p>Domestic $<?= $generalSetting->domestic_shipping_single_item ?>/item (single)</p>
+        <p>Domestic $<?= $generalSetting->domestic_shipping_multiple_item ?>/item (multiple)</p>
+        <p>International $<?= $generalSetting->international_shipping_single_item ?>/item (single)</p>
+        <p>International $<?= $generalSetting->international_shipping_multiple_item ?>/item (multiple)</p>
+    </div>
+</div>
+
+<div id="taxInfo" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('taxInfo')">&times;</span>
+        <h5>Tax Information</h5>
+        <p>Tax is calculated at <?= $generalSetting->tax_percent ?>%</p>
+    </div>
+</div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script type="text/javascript">
    function isNumber(evt) {
@@ -156,4 +218,13 @@ function formatCartItems($items) {
        }
        return true;
    }
+</script>
+<script>
+    function openModal(id) {
+        document.getElementById(id).style.display = 'block';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
 </script>
