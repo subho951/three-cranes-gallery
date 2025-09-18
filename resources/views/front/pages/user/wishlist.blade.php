@@ -35,10 +35,10 @@ use App\Helpers\Helper;
                             <?= $sl++ ?>
                         </td>
                         <td>
-                            <a href="<?= url('product-details/' . Helper::encoded($row->product_id)) ?>" target="_blank"><img src="<?= env('UPLOADS_URL') . 'product/' . (($getProduct) ? $getProduct->cover_image : '') ?>" alt="<?= (($getProduct) ? $getProduct->name : '') ?>" class="img-thumbnail" style="width: 100px; height: 100px;"></a>
+                            <a href="<?= url('product/' . (($getProduct) ? $getProduct->slug : '') . '/' . Helper::encoded($row->product_id)) ?>" target="_blank"><img src="<?= env('UPLOADS_URL') . 'product/' . (($getProduct) ? $getProduct->cover_image : '') ?>" alt="<?= (($getProduct) ? $getProduct->name : '') ?>" class="img-thumbnail" style="width: 100px; height: 100px;"></a>
                         </td>
                         <td>
-                            <a href="<?= url('product-details/' . Helper::encoded($row->product_id)) ?>" target="_blank"><?= (($getProduct) ? $getProduct->name : '') ?></a>
+                            <a href="<?= url('product/' . (($getProduct) ? $getProduct->slug : '') . '/' . Helper::encoded($row->product_id)) ?>" target="_blank"><?= (($getProduct) ? $getProduct->name : '') ?></a>
                         </td>
                         <td>
                             <span>$<?= (($getProduct) ? number_format($getProduct->base_price, 2) : 0.00) ?></span>

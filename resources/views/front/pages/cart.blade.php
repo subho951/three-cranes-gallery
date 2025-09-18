@@ -118,7 +118,7 @@ function formatCartItems($items)
                             ?>
                                     <tr class="cart_item">
                                         <td class="product-thumbnail">
-                                            <a href="<?= url('product/' . (($getProduct) ? $getProduct->slug : '')) ?>" class="d-flex align-items-center">
+                                            <a href="<?= url('product/' . (($getProduct) ? $getProduct->slug : '') . '/' . Helper::encoded((($getProduct) ? $getProduct->id : 0))) ?>" class="d-flex align-items-center">
                                                 <div class="cart-product-img">
                                                     <img src="<?= env('UPLOADS_URL') . 'product/' . (($getProduct) ? $getProduct->cover_image : '') ?>" alt="<?= (($getProduct) ? $getProduct->name : '') ?>">
                                                 </div>

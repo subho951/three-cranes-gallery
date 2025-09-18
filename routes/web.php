@@ -21,7 +21,7 @@ use App\Http\Controllers\PayPalController;
         Route::match(['get', 'post'], 'products/{id1}', 'App\Http\Controllers\FrontController@category');
         Route::match(['get', 'post'], 'products/{id1}/{id2}', 'App\Http\Controllers\FrontController@subcategory');
         Route::match(['get', 'post'], 'product-sorting/{id1}/{id2}', 'App\Http\Controllers\FrontController@productSorting');
-        Route::match(['get', 'post'], 'product/{id1}', 'App\Http\Controllers\FrontController@productDetails');
+        Route::match(['get', 'post'], 'product/{id1}/{id2}', 'App\Http\Controllers\FrontController@productDetails');
         Route::match(['get', 'post'], 'get-size-wise-attributes', 'App\Http\Controllers\FrontController@getSizeWiseAttributes');
         Route::match(['get', 'post'], 'make-wishlist/{id1}', 'App\Http\Controllers\FrontController@makeWishlist');
         Route::match(['get', 'post'], 'add-to-cart', 'App\Http\Controllers\FrontController@addToCart');
@@ -31,9 +31,19 @@ use App\Http\Controllers\PayPalController;
         Route::match(['get', 'post'], 'update-cart-item/{id1}', 'App\Http\Controllers\FrontController@updateCartItem');
         Route::match(['get', 'post'], 'checkout', 'App\Http\Controllers\FrontController@checkout');
         Route::match(['get', 'post'], 'place-order', 'App\Http\Controllers\FrontController@placeOrder');
+		Route::match(['get', 'post'], 'pay-by-card/{id1}', 'App\Http\Controllers\FrontController@payByCard');
         Route::match(['get', 'post'], 'pay-by-paypal/{id1}', 'App\Http\Controllers\FrontController@payByPaypal');
         Route::match(['get', 'post'], 'order-success/{id1}', 'App\Http\Controllers\FrontController@orderSuccess');
         Route::match(['get', 'post'], 'order-failure/{id1}', 'App\Http\Controllers\FrontController@orderFailure');
+
+		Route::get('stripe', [FrontController::class, 'stripe'])->name('stripe.index');
+        Route::get('stripe/checkout', [FrontController::class, 'stripeCheckout'])->name('stripe.checkout');
+        Route::get('stripe/checkout/success/{id}', [FrontController::class, 'stripeCheckoutSuccess'])->name('stripe.checkout.success');
+
+        Route::get('paypal', [PayPalController::class, 'index'])->name('paypal');
+        Route::get('paypal/payment/{id1}', [PayPalController::class, 'payment'])->name('paypal.payment');
+        Route::get('paypal/payment/success/{id1}', [PayPalController::class, 'paymentSuccess'])->name('paypal.payment.success');
+        Route::get('paypal/payment/cancel/{id1}', [PayPalController::class, 'paymentCancel'])->name('paypal.payment/cancel');
 
         Route::match(['get', 'post'], '/specials', 'App\Http\Controllers\FrontController@specials');
         Route::match(['get', 'post'], '/contact', 'App\Http\Controllers\FrontController@contactUs');

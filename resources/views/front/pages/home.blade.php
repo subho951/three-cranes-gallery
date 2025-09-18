@@ -1,5 +1,6 @@
 <?php
 use App\Models\UserReview;
+use App\Helpers\Helper;
 ?>
 <!-- banner-slide-start -->
 <section class="banner-section_start">
@@ -56,21 +57,21 @@ use App\Models\UserReview;
           <div class="product-box">
             <div class="product-img">
               <div class="product-img-box">
-                <a href="<?=url('/product/' . $product->slug)?>">
+                <a href="<?=url('/product/' . $product->slug . '/' . Helper::encoded($product->id))?>">
                   <img src="<?=env('UPLOADS_URL').'/product/' . $product->cover_image?>" class="img-fluid" alt="<?=$product->name?>">
                 </a>
               </div>
               <div class="add-callection">
-                <a href="<?=url('/product/' . $product->slug)?>">Add to cart</a>
+                <a href="<?=url('/product/' . $product->slug . '/' . Helper::encoded($product->id))?>">Add to cart</a>
               </div>
               <div class="whist_icon">
-                <a href="<?=url('/product/' . $product->slug)?>">
+                <a href="<?=url('/product/' . $product->slug . '/' . Helper::encoded($product->id))?>">
                   <img src="<?=env('FRONT_ASSETS_URL')?>images/heart_icon.png" alt="" class="heart_icon">
                 </a>
               </div>
             </div>
             <div class="product-info">
-              <a href="<?=url('/product/' . $product->slug)?>"><?=$product->name?></a>
+              <a href="<?=url('/product/' . $product->slug . '/' . Helper::encoded($product->id))?>"><?=$product->name?></a>
             </div>
             <div class="product-info-t">
               <h5>$ <?=number_format($product->discounted_price,2)?>+</h5>

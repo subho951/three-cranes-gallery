@@ -1,6 +1,7 @@
 <?php
 use App\Models\Category;
 use App\Models\Product;
+use App\Helpers\Helper;
 ?>
 <div class="top-header">
     <div class="container">
@@ -137,7 +138,7 @@ use App\Models\Product;
                                         $newProducts = Product::select('id', 'name', 'slug')->where('is_new', '=', 1)->where('status', '=', 1)->limit(10)->get();
                                         if($newProducts){ foreach($newProducts as $product){
                                         ?>
-                                            <li><a class="dropdown-item" href="<?=url('/product/' . $product->slug)?>"><?=$product->name?></a></li>
+                                            <li><a class="dropdown-item" href="<?=url('/product/' . $product->slug . '/' . Helper::encoded($product->id))?>"><?=$product->name?></a></li>
                                         <?php } }?>
                                     </ul>
                                 </li>

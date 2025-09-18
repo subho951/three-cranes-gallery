@@ -180,10 +180,10 @@ class FrontController extends Controller
         }
     /* sub category */
     /* product details */
-        public function productDetails(Request $request, $slug){
+        public function productDetails(Request $request, $slug, $id){
+            $id                             = Helper::decoded($id);
             $data['slug']                   = $slug;
-            $data['product']                = Product::where('slug', '=', $slug)->first();
-            $id                             = (($data['product'])?$data['product']->id:'');
+            $data['product']                = Product::where('id', '=', $id)->where('status', '=', 1)->first();
             $data['product_id']             = $id;
             $data['product_slug']           = $slug;
             $data['product_images']         = ProductImage::select('image')->where('status', '=', 1)->where('product_id', '=', $id)->get();
@@ -400,7 +400,7 @@ class FrontController extends Controller
                 /* email log save */
             }
             
-            $currentUrl = url('product/' . (($getProduct)?$getProduct->slug:''));
+            $currentUrl = url('product/' . (($getProduct)?$getProduct->slug:'') . '/' .Helper::encoded((($getProduct)?$getProduct->id:'')));
             return redirect($currentUrl)->with('success_message', $msg);
         }
     /* product details */

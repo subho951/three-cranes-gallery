@@ -77,4 +77,14 @@
         text-overflow: ellipsis;
         font-size: 14px;
     }
+    .product-info a {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;   /* limit to 2 lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;     /* allows wrapping */
+        height: 3.5em;             /* adjust based on font-size/line-height */
+        line-height: 1.5em;      /* example line-height */
+    }
 </style>
