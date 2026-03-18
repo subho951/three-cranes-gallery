@@ -5,6 +5,7 @@ use App\Models\ProductAttribute;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\ProductImage;
+use App\Models\ProductVariation;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\CancelOrderReason;
@@ -94,11 +95,14 @@ $generalSetting = GeneralSetting::find(1);
                          <table class="table table-sm mb-0">
                             <thead>
                                <tr class="bg-light">
-                                  <td class="col-1 text-center"><strong>#</strong></td>
-                                  <td class="col-6 "><strong>Product Name</strong></td>
-                                  <td class="col-1 text-center"><strong>Qty</strong></td>
-                                  <td class="col-2 text-end"><strong>Rate</strong></td>
-                                  <td class="col-2 text-end"><strong>Amount</strong></td>
+                                  <td class="text-center" style="width: 50px;"><strong>#</strong></td>
+                                  <td class="text-center" style="width: 80px;"><strong>Image</strong></td>
+                                  <td><strong>Product Name</strong></td>
+                                  <td style="width: 200px;"><strong>Size / Color</strong></td>
+                                  <td style="width: 120px;"><strong>SKU</strong></td>
+                                  <td class="text-center" style="width: 70px;"><strong>Qty</strong></td>
+                                  <td class="text-end" style="width: 110px;"><strong>Rate</strong></td>
+                                  <td class="text-end" style="width: 110px;"><strong>Amount</strong></td>
                                </tr>
                             </thead>
                             <tbody>
@@ -111,21 +115,52 @@ $generalSetting = GeneralSetting::find(1);
                                   $subtotal      += $orderDetail->total;
                                   $parent_id_val    = json_decode($orderDetail->parent_id_val);
                                   $child_id_val  = json_decode($orderDetail->child_id_val);
-                               ?>
+                                  $variationInfo = null;
+                                  if ((int)$orderDetail->variation_id > 0) {
+                                    $variationInfo = ProductVariation::select('sku')->where('id', '=', $orderDetail->variation_id)->first();
+                                  }
+                                  $sku = (($variationInfo && $variationInfo->sku != '') ? $variationInfo->sku : (($getProduct && $getProduct->product_sku != '') ? $getProduct->product_sku : '-'));
+                                  $sizeColor = '-';
+                                  if (is_array($parent_id_val) && is_array($child_id_val) && count($parent_id_val) > 0) {
+                                    $sizeColorList = [];
+                                    for($i=0; $i<count($parent_id_val); $i++){
+                                      $attrName = trim((string)$parent_id_val[$i]);
+                                      $attrVal  = trim((string)($child_id_val[$i] ?? ''));
+                                      if($attrName != '' && $attrVal != ''){
+                                        $sizeColorList[] = $attrName.' : '.$attrVal;
+                                      } elseif($attrVal != ''){
+                                        $sizeColorList[] = $attrVal;
+                                      }
+                                    }
+                                    if(!empty($sizeColorList)){
+                                      $sizeColor = implode(', ', $sizeColorList);
+                                    }
+                                  }
+                                  if($sizeColor == '-' && $orderDetail->variation_name != ''){
+                                    $sizeColor = $orderDetail->variation_name;
+                                  }
+                                  $productImage = (($getProduct && $getProduct->cover_image != '') ? env('UPLOADS_URL').'product/'.$getProduct->cover_image : '');
+                                ?>
                                   <tr>
-                                     <td class="col-1 text-center"><?=$sl++?></td>
-                                     <td class="col-6">
-                                        <?=$getProduct->name?><br>
-                                        <?php if($getProduct->external_product_link != ''){?>
+                                     <td class="text-center"><?=$sl++?></td>
+                                     <td class="text-center">
+                                        <?php if($productImage != ''){ ?>
+                                          <img src="<?=$productImage?>" alt="<?=($getProduct ? $getProduct->name : 'Product')?>" style="width: 60px;height: 60px;object-fit: cover;border-radius: 4px;">
+                                        <?php } else { ?>
+                                          -
+                                        <?php } ?>
+                                     </td>
+                                     <td>
+                                        <?=($getProduct ? $getProduct->name : '-')?><br>
+                                        <?php if($getProduct && $getProduct->external_product_link != ''){?>
                                           <a href="<?=$getProduct->external_product_link?>" target="_blank"><span class="badge bg-info"><i class="fa fa-link"></i> External Product Link</span></a>
                                         <?php }?>
-                                        <?php if($parent_id_val){ for($i=0;$i<count($parent_id_val);$i++){?>
-                                            <p class="text-muted mb-0"><?=$parent_id_val[$i]?> : <small><?=$child_id_val[$i]?></small></p>
-                                        <?php } }?>
                                      </td>
-                                     <td class="col-1 text-center"><?=$orderDetail->qty?></td>
-                                     <td class="col-2 text-end">$<?=number_format($orderDetail->rate,2)?></td>
-                                     <td class="col-2 text-end">$<?=number_format($orderDetail->total,2)?></td>
+                                     <td><?=$sizeColor?></td>
+                                     <td><?=$sku?></td>
+                                     <td class="text-center"><?=$orderDetail->qty?></td>
+                                     <td class="text-end">$<?=number_format($orderDetail->rate,2)?></td>
+                                     <td class="text-end">$<?=number_format($orderDetail->total,2)?></td>
                                   </tr>
                                <?php } }?>
                             </tbody>

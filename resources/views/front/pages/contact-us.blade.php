@@ -16,7 +16,7 @@ use App\Helpers\Helper;
             <h6 class="alert alert-danger autohide">{{ session('error_message') }}</h6>
             @endif
             <h2>Get In Touch</h2>
-            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+            <div class="col-md-6 col-lg-6">
                 <div class="contact_left">
                     <h2>Contact Information</h2>
                     <ul id="contact" class="contact-listing">
@@ -42,40 +42,41 @@ use App\Helpers\Helper;
                     </ul>
                 </div>
             </div>
-            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+            <div class="col-md-6 col-lg-6">
                 <div class="contact_right">
                     <div class="row clearfix">
                         <form class="contact_form" id="frm" name="frm" method="POST" action="<?= url('contact') ?>">
                             @csrf
+                            <span class="text-danger">All fields are mandatory</span>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="text" placeholder="First Name" name="fname" id="fname" title="First Name is required" class="form-control requiredContact" data-check="First name" autocomplete="off">
+                                        <input type="text" placeholder="First Name" name="fname" id="fname" title="First Name is required" class="form-control requiredContact" data-check="First name" autocomplete="off" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="text" placeholder="Last Name" name="lname" id="lname" title="Last Name is required" class="form-control requiredContact" data-check="Last name" autocomplete="off">
+                                        <input type="text" placeholder="Last Name" name="lname" id="lname" title="Last Name is required" class="form-control requiredContact" data-check="Last name" autocomplete="off" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="email" placeholder="Email" name="email" id="email" title="Email is required" class="form-control requiredContact" data-check="Email" autocomplete="off">
+                                        <input type="email" placeholder="Email" name="email" id="email" title="Email is required" class="form-control requiredContact" data-check="Email" autocomplete="off" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="text" placeholder="Phone" name="phone" id="phone" pattern="\S+" title="Phone is required" class="form-control requiredContact" data-check="Phone" autocomplete="off">
+                                        <input type="text" placeholder="Phone" name="phone" id="phone" pattern="\S+" title="Phone is required" class="form-control requiredContact" data-check="Phone" autocomplete="off" required>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <input type="text" placeholder="Subject" name="subject" id="subject" title="Subject is required" class="form-control requiredContact" data-check="Subject" autocomplete="off">
+                                        <input type="text" placeholder="Subject" name="subject" id="subject" title="Subject is required" class="form-control requiredContact" data-check="Subject" autocomplete="off" required>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <textarea placeholder="Message..." rows="5" name="message" id="message" title="Message is required" class="form-control requiredContact" data-check="Message" autocomplete="off"></textarea>
+                                        <textarea placeholder="Message..." rows="5" name="message" id="message" title="Message is required" class="form-control requiredContact" data-check="Message" autocomplete="off" required></textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-12">

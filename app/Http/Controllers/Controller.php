@@ -229,6 +229,7 @@ class Controller extends BaseController
         $data['header']             = view('front.elements.header', $data);
         $data['footer']             = view('front.elements.footer', $data);
         $data['maincontent']        = view('front.pages.'.$page_name, $data);
+        $data['cat']                = [];
         return view('front.layout-before-login', $data);
     }
     // front after login layout
@@ -246,6 +247,7 @@ class Controller extends BaseController
         $data['sidebar']            = view('front.elements.sidebar', $data);
         $data['footer']             = view('front.elements.footer', $data);
         $data['maincontent']        = view('front.pages.user.'.$page_name, $data);
+        $data['cat']                = [];
         return view('front.layout-after-login', $data);
     }
     // admin authentication layout

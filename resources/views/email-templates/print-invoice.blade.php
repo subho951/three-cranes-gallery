@@ -5,11 +5,13 @@ use App\Models\ProductAttribute;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\ProductImage;
+use App\Models\ProductVariation;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\CancelOrderReason;
 use App\Helpers\Helper;
 $generalSetting = GeneralSetting::find(1);
+
 // function image_to_base64($file_path) {
 //     $imageData = file_get_contents($file_path);
 //     return 'data:image/png;base64,' . base64_encode($imageData);
@@ -166,10 +168,10 @@ $generalSetting = GeneralSetting::find(1);
         }
         .cart-table tr td:last-child {
             text-align: right;
-            width: 18%;
+            width: 16%;
         }
         .cart-table tr td{
-        border: 1px solid #ccc;
+            border: 1px solid #ccc;
         }
         .border-none {
             border: none !important;
@@ -177,6 +179,17 @@ $generalSetting = GeneralSetting::find(1);
         }
         .text-right{
             text-align: right;
+        }
+        .table-head td{
+            font-weight: 600;
+            background: #f5f5f5;
+            font-size: 11px;
+        }
+        .muted-red{
+            color: #b94a48;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 3px 0;
         }
     </style>
 </head>
@@ -251,7 +264,14 @@ $generalSetting = GeneralSetting::find(1);
             </td>
             <td style="width: 75%;">
                 <table style="width: 100%;" class="cart-table">
-                  	<?php
+                    <tr class="table-head">
+                        <td style="width: 12%;">Image</td>
+                        <td style="width: 44%;">Product</td>
+                        <td style="width: 18%;">Size / Color</td>
+                        <td style="width: 12%;">SKU</td>
+                        <td style="width: 14%; text-align: right;">Amount</td>
+                    </tr>
+                   	<?php
                      $orderDetails = OrderDetail::where('order_id', '=', $getOrderDetail->id)->get();
                      $sl=1;
                      $subtotal=0;
@@ -260,9 +280,33 @@ $generalSetting = GeneralSetting::find(1);
                         $subtotal      += $orderDetail->total;
                         $parent_id_val    = json_decode($orderDetail->parent_id_val);
                         $child_id_val  = json_decode($orderDetail->child_id_val);
+                        $variationInfo = null;
+                        if ((int)$orderDetail->variation_id > 0) {
+                            $variationInfo = ProductVariation::select('sku')->where('id', '=', $orderDetail->variation_id)->first();
+                        }
+                        $sku = (($variationInfo && $variationInfo->sku != '') ? $variationInfo->sku : (($getProduct && $getProduct->product_sku != '') ? $getProduct->product_sku : 'N/A'));
+                        $sizeColor = 'N/A';
+                        if (is_array($parent_id_val) && is_array($child_id_val) && count($parent_id_val) > 0) {
+                            $sizeColorList = [];
+                            for($i=0; $i<count($parent_id_val); $i++){
+                                $attrName = trim((string)$parent_id_val[$i]);
+                                $attrVal  = trim((string)($child_id_val[$i] ?? ''));
+                                if($attrName != '' && $attrVal != ''){
+                                    $sizeColorList[] = $attrName.' : '.$attrVal;
+                                } elseif($attrVal != ''){
+                                    $sizeColorList[] = $attrVal;
+                                }
+                            }
+                            if(!empty($sizeColorList)){
+                                $sizeColor = implode(', ', $sizeColorList);
+                            }
+                        }
+                        if($sizeColor == 'N/A' && $orderDetail->variation_name != ''){
+                            $sizeColor = $orderDetail->variation_name;
+                        }
                     ?>
                       <tr>
-                          <td style="width:10%">
+                          <td style="width:12%">
                             <?php
                             $url = env('UPLOADS_URL').'product/'.(($getProduct)?$getProduct->cover_image:'');
                             $headers = @get_headers($url);
@@ -277,16 +321,22 @@ $generalSetting = GeneralSetting::find(1);
                                 <img src="<?=env('UPLOADS_URL').'product/'.(($getProduct)?$getProduct->cover_image:'')?>" style="height:auto !important; width: 50px !important;" class="img-fluid" alt="<?=$getProduct->name?>">
                             <?php } ?>
                           </td>
-                          <td>
+                          <td style="width:44%">
                               <small><?=(($getProduct)?$getProduct->name:'')?></small>
                           </td>
-                          <td>
+                          <td style="width:18%">
+                              <p class="muted-red"><?=$sizeColor?></p>
+                          </td>
+                          <td style="width:12%">
+                              <p class="muted-red"><?=$sku?></p>
+                          </td>
+                          <td style="width:14%; text-align: right;">
                               <?=$orderDetail->qty?> x $<?=number_format($orderDetail->rate,2)?>
                           </td>
                       </tr>
                     <?php } }?>
                     <tr>
-                        <td class="border-none text-right"></td>
+                        <td colspan="3" class="border-none text-right"></td>
                         <td class="border-none text-right">
                             Item total 
                         </td>
@@ -294,29 +344,29 @@ $generalSetting = GeneralSetting::find(1);
                             $<?=number_format($subtotal,2)?>
                         </td>
                     </tr>
-                  	<tr>
-                        <td class="border-none text-right"></td>
+                   	<tr>
+                        <td colspan="3" class="border-none text-right"></td>
                         <td class="border-none text-right">Discount</td>
                         <td class="border-none text-right">
                             $<?=number_format($getOrderDetail->disc_amount,2)?>
                         </td>
                     </tr>
                     <tr>
-                        <td class="border-none text-right"></td>
+                        <td colspan="3" class="border-none text-right"></td>
                         <td class="border-none text-right">Shipping total</td>
                         <td class="border-none text-right">
                             $<?=number_format($getOrderDetail->shipping_amt,2)?>
                         </td>
                     </tr>
-                  	<tr>
-                        <td class="border-none text-right"></td>
+                   	<tr>
+                        <td colspan="3" class="border-none text-right"></td>
                         <td class="border-none text-right">Tax</td>
                         <td class="border-none text-right">
                             $<?=number_format($getOrderDetail->tax_amt,2)?>
                         </td>
                     </tr>
                     <tr>
-                        <td class="border-none text-right"></td>
+                        <td colspan="3" class="border-none text-right"></td>
                         <td class="border-none text-right"><strong>Order total</strong></td>
                         <td class="border-none text-right">
                            <strong> $<?=number_format($getOrderDetail->net_amt,2)?></strong>

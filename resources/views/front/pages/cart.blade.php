@@ -137,12 +137,10 @@ function formatCartItems($items)
                                             <form method="POST" name="cart<?= $cartItem->id ?>" action="<?= url('update-cart-item/' . Helper::encoded($cartItem->id)) ?>">
                                                 @csrf
                                                 <div class="qty-input quantity">
-                                                    <?php if ($cartItem->qty > 1) { ?>
-                                                        <button class="qty-count qty-count--minus minus" data-action="minus" type="submit" onclick="incrementDecrementQty(<?= $cartItem->qty ?>);">-</button>
-                                                    <?php } ?>
+                                                    <button class="qty-count qty-count--minus minus" data-action="minus" type="submit" onclick="incrementDecrementQty(<?= $cartItem->qty ?>);" <?= (($cartItem->qty <= 1)?'disabled':'') ?>>-</button>
                                                     <!-- <input class="product-qty" min="0" max="10" readonly type="text" value="<?= $cartItem->qty ?>" name="product-qty"> -->
 
-                                                    <input class="product-qty" type="number" name="qty" min="0" max="10" value="<?= $cartItem->qty ?>" readonly>
+                                                    <input class="product-qty" type="number" name="qty" min="0" max="100" value="<?= $cartItem->qty ?>" readonly>
 
                                                     <button class="qty-count qty-count--add plus" data-action="add" type="submit" onclick="incrementDecrementQty(<?= $cartItem->qty ?>);">+</button>
 
@@ -178,7 +176,7 @@ function formatCartItems($items)
                                             @csrf
                                             <input type="hidden" name="mode" value="coupon">
                                             <div class="coupon">
-                                                <input class="input-text" id="coupon_code" placeholder="Coupon code" type="text" value="<?= session('sess_coupon_code') ?>" name="coupon_code">
+                                                <input class="input-text" id="coupon_code" placeholder="Coupon code" type="text" value="<?= session('sess_coupon_code') ?>" name="coupon_code" required>
                                                 <button type="submit" class="button" id="apply_coupon">Apply coupon</button>
                                                 <?php if (session('is_coupon')) { ?>
                                                     <a href="<?= url('remove-coupon') ?>" id="remove_coupon" onclick="return confirm('Do you want to remove coupon code ?');"><button type="button" class="button" style="background: #8b2525;">Remove coupon</button></a>
@@ -211,6 +209,23 @@ function formatCartItems($items)
                                 <div data-title="Subtotal" class="text-end">
                                     <span class="amount text-danger">
                                         <bdi><span class="Price-currencySymbol">- $</span><?= number_format($disc_tot, 2) ?></bdi>
+                                    </span>
+                                </div>
+                            </div>
+                          	<div class="cart-subtotal mb-2">
+                                <div class="title">Select Delivery Country</div>
+                                <div data-title="Subtotal" class="text-end">
+                                    <span class="amount text-danger">
+                                       <form id="ledgerForm" method="POST" action="">
+                                            @csrf
+                                            <input type="hidden" name="mode" value="shipping">
+                                            <select name="s_country" id="s_country" class="form-select" onchange="this.form.submit()">
+                                                <option value="" selected>Select Country</option>
+                                                <?php if($countries){ foreach($countries as $cty){?>
+                                                    <option value="<?= $cty->name ?>" <?= (($cty->name == session('shipping_country'))?'selected':'') ?>><?= $cty->name ?></option>
+                                                <?php } }?>
+                                            </select>
+                                        </form>
                                     </span>
                                 </div>
                             </div>
@@ -247,11 +262,12 @@ function formatCartItems($items)
                         </div>
                         <div class="checkout-btn">
                             <?php $currentUrl = url('cart/'); ?>
-                            <?php if (session('user_id')) { ?>
+                            <a href="<?= url('checkout') ?>">Proceed to checkout</a>
+                            <!-- <?php if (session('user_id')) { ?>
                                 <a href="<?= url('checkout') ?>">Proceed to checkout</a>
                             <?php } else { ?>
                                 <a href="<?= url('signin/' . Helper::encoded($currentUrl)) ?>">Proceed to checkout</a>
-                            <?php } ?>
+                            <?php } ?> -->
                         </div>
                     </div>
                 </div>

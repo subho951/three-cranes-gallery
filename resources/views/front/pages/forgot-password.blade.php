@@ -16,13 +16,13 @@
                         @csrf
                         <div class="form-outline mb-3">
                             <label class="form-label" for="email">Email <span class="text-danger">*</span></label>
-                            <input type="email" id="email" class="form-control form-control-lg" name="email" required />
+                            <input type="email" id="email" class="form-control form-control-lg" name="email" placeholder="Email" required />
                         </div>
                         <div class="d-flex mt-4">
                             <button type="submit" class="btn common-btn">Submit</button>
                         </div>
                         <p class="reg-informaton mt-3 mb-0 ">
-                            “Trouble logging in? Just type in your email, and we’ll help you reset your password.”
+                            Trouble logging in? Just type in your email, and we'll help you reset your password.
                         </p>
                     </form>
                 </div>

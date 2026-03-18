@@ -1,6 +1,28 @@
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WMNF55CW');</script>
+<!-- End Google Tag Manager -->
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?= $title ?></title>
+
+<?php
+//print_r($cat);
+?>
+<?php if(!empty($cat)) {?>
+    <title><?= strip_tags(html_entity_decode($cat->meta_title)) ?></title>
+    <meta name="description" content="{{ strip_tags(html_entity_decode($cat->meta_description)) }}">
+    <meta name="keywords" content="{{ strip_tags(html_entity_decode($cat->meta_keywords)) }}">
+<?php } else {?>
+    <title><?= strip_tags(html_entity_decode($generalSetting->meta_title)) ?></title>
+    <meta name="description" content="{{ strip_tags(html_entity_decode($generalSetting->meta_description)) }}">
+    <meta name="keywords" content="{{ strip_tags(html_entity_decode($generalSetting->meta_keywords)) }}">
+<?php }?>
+
 <!-- Favicons -->
 <link href="<?= env('UPLOADS_URL') . $generalSetting->site_favicon ?>" rel="icon">
 <link rel="stylesheet" href="<?= env('FRONT_ASSETS_URL') ?>css/all.min.css">
@@ -40,14 +62,26 @@
 <style>
     #searchResults {
         max-height: 300px;
+        width: -webkit-fill-available;
         overflow-y: auto;
         padding: 0;
         margin: 0;
         list-style: none;
-        border: 1px solid #ccc;
-        border-top: none;
+        position: absolute;
+        z-index: 9;
+      	left: 0;
+      	display: block;
+      box-shadow: 0 5px 10px -5px #000;
     }
-
+	.mid-header ul li span.search-text{
+      background: transparent;
+      color: #000;
+      border-radius: 0;
+      display: block;
+      width: auto;
+      height: auto;
+      position: unset;
+  	}
     .search-item {
         display: flex;
         align-items: center;
@@ -88,3 +122,5 @@
         line-height: 1.5em;      /* example line-height */
     }
 </style>
+
+<meta name="google-site-verification" content="U8MM60urLfsRrduGFk_YBBcTcbWbO3la9zE3e_FgdVA" />

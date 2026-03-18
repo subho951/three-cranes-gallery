@@ -63,7 +63,7 @@
               if (!empty($footer_link_name)) {
                 for ($k = 0; $k < count($footer_link_name); $k++) {
               ?>
-                  <li><a href="<?= url('/') . '/' . $footer_link[$k] ?>"><?= $footer_link_name[$k] ?></a></li>
+                  <li><a href="<?= url('/') . '/' . $footer_link[$k] ?>" target="_blank"><?= $footer_link_name[$k] ?></a></li>
               <?php }
               } ?>
             </ul>
@@ -79,7 +79,7 @@
               if (!empty($footer_link_name2)) {
                 for ($k = 0; $k < count($footer_link_name2); $k++) {
               ?>
-                  <li><a href="<?= url('/') . '/' . $footer_link2[$k] ?>"><?= $footer_link_name2[$k] ?></a></li>
+                  <li><a href="<?= url('/') . '/' . $footer_link2[$k] ?>" target="_blank"><?= $footer_link_name2[$k] ?></a></li>
               <?php }
               } ?>
             </ul>
@@ -95,7 +95,7 @@
               if (!empty($footer_link_name3)) {
                 for ($k = 0; $k < count($footer_link_name3); $k++) {
               ?>
-                  <li><a href="<?= url('/') . '/' . $footer_link3[$k] ?>"><?= $footer_link_name3[$k] ?></a></li>
+                  <li><a href="<?= url('/') . '/' . $footer_link3[$k] ?>" target="_blank"><?= $footer_link_name3[$k] ?></a></li>
               <?php }
               } ?>
             </ul>

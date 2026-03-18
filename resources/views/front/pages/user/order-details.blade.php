@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
+use App\Models\ProductVariation;
 use App\Helpers\Helper;
 
 function formatCartItems($items)
@@ -109,6 +110,8 @@ function formatCartItems($items)
                             <tr>
                                 <th style="width: 70px;border: 1px solid #eee;">No.</th>
                                 <th style="border: 1px solid #eee;">Item</th>
+                                <th style="border: 1px solid #eee; min-width: 180px;">Size / Color</th>
+                                <th style="border: 1px solid #eee; min-width: 120px;">SKU</th>
                                 <th style="border: 1px solid #eee;">Price</th>
                                 <th style="border: 1px solid #eee;">Quantity</th>
                                 <th class="text-end border: 1px solid #eee;" style="width: 120px;">Total</th>
@@ -125,6 +128,30 @@ function formatCartItems($items)
                                     $subtotal         += $orderDetail->total;
                                     $parent_id_val     = json_decode($orderDetail->parent_id_val);
                                     $child_id_val     = json_decode($orderDetail->child_id_val);
+                                    $variationInfo = null;
+                                    if ((int)$orderDetail->variation_id > 0) {
+                                        $variationInfo = ProductVariation::select('sku')->where('id', '=', $orderDetail->variation_id)->first();
+                                    }
+                                    $sku = (($variationInfo && $variationInfo->sku != '') ? $variationInfo->sku : (($getProduct && $getProduct->product_sku != '') ? $getProduct->product_sku : '-'));
+                                    $sizeColor = '-';
+                                    if (is_array($parent_id_val) && is_array($child_id_val) && count($parent_id_val) > 0) {
+                                        $sizeColorList = [];
+                                        for ($a = 0; $a < count($parent_id_val); $a++) {
+                                            $attrName = trim((string)$parent_id_val[$a]);
+                                            $attrVal = trim((string)($child_id_val[$a] ?? ''));
+                                            if ($attrName != '' && $attrVal != '') {
+                                                $sizeColorList[] = $attrName . ' : ' . $attrVal;
+                                            } elseif ($attrVal != '') {
+                                                $sizeColorList[] = $attrVal;
+                                            }
+                                        }
+                                        if (!empty($sizeColorList)) {
+                                            $sizeColor = implode(', ', $sizeColorList);
+                                        }
+                                    }
+                                    if ($sizeColor == '-' && $orderDetail->variation_name != '') {
+                                        $sizeColor = $orderDetail->variation_name;
+                                    }
                             ?>
                                     <tr>
                                         <th style="border: 1px solid #eee;" scope="row"><?= $sl++ ?></th>
@@ -133,20 +160,11 @@ function formatCartItems($items)
                                                 <a target="_blank" href="<?= url('product/' . (($getProduct) ? $getProduct->slug : '') . '/' .Helper::encoded((($getProduct)?$getProduct->id:''))) ?>"><img width="100" height="100" src="<?= env('UPLOADS_URL') . 'product/' . $getProduct->cover_image ?>" alt="<?= $getProduct->name ?>"></a>
                                             </div>
                                             <div>
-                                                <h5 class="text-truncate font-size-14 mb-0"><a target="_blank" href="<?= url('product/' . (($getProduct) ? $getProduct->slug : '') . '/' .Helper::encoded((($getProduct)?$getProduct->id:''))) ?>"><?= $getProduct->name ?></a></h5>
-                                                <!-- <ul> -->
-                                                <?php $parantAttrs = [];
-                                                if (!empty($parent_id_val)) {
-                                                    for ($a = 0; $a < count($parent_id_val); $a++) { ?>
-                                                        <!-- <li><small><b><?= $parent_id_val[$a] ?></b> </small></li> -->
-                                                        <?php $parantAttrs[] = $parent_id_val[$a]; ?>
-                                                <?php }
-                                                } ?>
-                                                <!-- </ul> -->
-                                                <h6><b><?= implode(", ", $parantAttrs) ?></b></h6>
-                                                <?= formatCartItems($child_id_val); ?>
+                                                <h5 class="text-truncate font-size-14 mb-0"><a target="_blank" href="<?= url('product/' . (($getProduct) ? $getProduct->slug : '') . '/' .Helper::encoded((($getProduct)?$getProduct->id:''))) ?>"><?= wordwrap($getProduct->name,35,"<br>\n") ?></a></h5>
                                             </div>
                                         </td>
+                                        <td style="border: 1px solid #eee;"><?= $sizeColor ?></td>
+                                        <td style="border: 1px solid #eee;"><?= $sku ?></td>
                                         <td style="border: 1px solid #eee;">$<?= number_format($orderDetail->rate, 2) ?></td>
                                         <td style="border: 1px solid #eee;"><?= $orderDetail->qty ?></td>
                                         <td style="border: 1px solid #eee;" class="text-end">$<?= number_format($orderDetail->total, 2) ?></td>
@@ -154,23 +172,23 @@ function formatCartItems($items)
                             <?php }
                             } ?>
                             <tr>
-                                <th scope="row" colspan="4" class="text-end">Sub Total</th>
+                                <th scope="row" colspan="6" class="text-end">Sub Total</th>
                                 <td class="text-end">$<?= number_format($subtotal, 2) ?></td>
                             </tr>
                             <tr>
-                                <th scope="row" colspan="4" class="border-0 text-end"> Discount :</th>
+                                <th scope="row" colspan="6" class="border-0 text-end"> Discount :</th>
                                 <td class="border-0 text-end">- $<?= number_format($getOrderDetail->disc_amount, 2) ?></td>
                             </tr>
                             <tr>
-                                <th scope="row" colspan="4" class="border-0 text-end"> Shipping Charge :</th>
+                                <th scope="row" colspan="6" class="border-0 text-end"> Shipping Charge :</th>
                                 <td class="border-0 text-end">$<?= number_format($getOrderDetail->shipping_amt, 2) ?></td>
                             </tr>
                             <tr>
-                                <th scope="row" colspan="4" class="border-0 text-end"> Tax</th>
+                                <th scope="row" colspan="6" class="border-0 text-end"> Tax</th>
                                 <td class="border-0 text-end">$<?= number_format($getOrderDetail->tax_amt, 2) ?></td>
                             </tr>
                             <tr>
-                                <th style="border: 1px solid #eee;background: #ecebeb5c;" scope="row" colspan="4"
+                                <th style="border: 1px solid #eee;background: #ecebeb5c;" scope="row" colspan="6"
                                     class="text-end"> Net Total
                                 </th>
                                 <td style="border: 1px solid #eee;background: #ecebeb5c;" class="text-end">

@@ -4,6 +4,11 @@
         <?=$head?>
     </head>
     <body>
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframesrc="https://www.googletagmanager.com/ns.html?id=GTM-WMNF55CW"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
+        
         <!-- header start -->
         <div class="header">
             <?=$header?>
@@ -32,11 +37,11 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <div class="modal-title h4">Logout</div>
+                        <div class="modal-title h4">Signout</div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <h5 class="mb-4">Are you sure logout</h5>
+                        <h5 class="mb-4">Are you sure you want to log out?</h5>
                         <button class="btn btn-outline-danger" data-bs-dismiss="modal">Cancel</button>
                         <a href="<?=url('signout')?>"><button class="btn btn-primary ms-2">Confirm</button></a>
                     </div>

@@ -79,9 +79,9 @@ class SubCategoryController extends Controller
                         // 'banner_image'          => $banner_image,
                         // 'short_description'     => $postData['short_description'],
                         // 'description'           => $postData['description'],
-                        // 'meta_title'            => $postData['meta_title'],
-                        // 'meta_description'      => $postData['meta_description'],
-                        // 'meta_keywords'         => $postData['meta_keywords'],
+                        'meta_title'            => $postData['meta_title'],
+                        'meta_description'      => $postData['meta_description'],
+                        'meta_keywords'         => $postData['meta_keywords'],
                     ];
                     Category::insert($fields);
                     return redirect('admin/'.$this->data['controller_route'] . "/list")->with('success_message', $this->data['title'].' Inserted Successfully !!!');
@@ -148,9 +148,9 @@ class SubCategoryController extends Controller
                         // 'banner_image'          => $banner_image,
                         // 'short_description'     => $postData['short_description'],
                         // 'description'           => $postData['description'],
-                        // 'meta_title'            => $postData['meta_title'],
-                        // 'meta_description'      => $postData['meta_description'],
-                        // 'meta_keywords'         => $postData['meta_keywords'],
+                        'meta_title'            => $postData['meta_title'],
+                        'meta_description'      => $postData['meta_description'],
+                        'meta_keywords'         => $postData['meta_keywords'],
                     ];
                     Category::where($this->data['primary_key'], '=', $id)->update($fields);
                     return redirect('admin/'.$this->data['controller_route'] . "/list")->with('success_message', $this->data['title'].' Updated Successfully !!!');

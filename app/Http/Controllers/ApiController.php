@@ -1997,7 +1997,8 @@ class ApiController extends Controller
                             'product_qty'           => $product->product_qty,
                             'is_cart'               => (($checkCart > 0)?1:0),
                             'is_wishlist'           => (($checkWishlist > 0)?1:0),
-                            'product_link'          => url('product/edit/' . Helper::encoded($product->id)),
+                            'product_link'          => url('admin/product/edit/' . Helper::encoded($product->id)),
+                            'frontend_product_link' => url('product/'.$product->slug.'/' . Helper::encoded($product->id)),
                         ];
                     }
                 }

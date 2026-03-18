@@ -143,7 +143,7 @@ use App\Helpers\Helper;
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title h4">Add Billing/Shipping Address</div>
+                <div class="modal-title h4">Add Billing / Shipping Address</div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -153,8 +153,8 @@ use App\Helpers\Helper;
                     <div class="row form-style1">
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label class="form-label" for="type1">Type *</label>
-                                <select name="type" id="type1" class="form-control form-control-lg" required>
+                                <label class="form-label" for="type1">Type <span class="text-danger">*</span></label>
+                                <select name="type" id="type1" class="form-select form-select-lg" required style="font-size: 15px;">
                                     <option value="" selected>Select Type</option>
                                     <option value="BILLING">BILLING</option>
                                     <option value="SHIPPING">SHIPPING</option>
@@ -163,52 +163,52 @@ use App\Helpers\Helper;
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label class="form-label" for="title1">Title *</label>
-                                <input type="text" name="title" id="title1" class="form-control form-control-lg" required>
+                                <label class="form-label" for="title1">Title <span class="text-danger">*</span></label>
+                                <input type="text" name="title" id="title1" class="form-control form-control-lg" placeholder="Title" required>
                             </div>
                         </div>
                         <div class="col-lg-12">
                             <div class="form-group">
-                                <label class="form-label" for="address1">Address *</label>
-                                <input type="text" name="address" id="address1" class="form-control form-control-lg" required>
+                                <label class="form-label" for="address1">Address <span class="text-danger">*</span></label>
+                                <input type="text" name="address" id="address1" class="form-control form-control-lg" placeholder="Address" required>
                                 <input type="hidden" name="lat" id="lat1">
                                 <input type="hidden" name="lng" id="lng1">
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label class="form-label" for="country1">Country *</label>
-                                <input type="text" name="country" id="country1" class="form-control form-control-lg" required>
+                                <label class="form-label" for="country1">Country <span class="text-danger">*</span></label>
+                                <input type="text" name="country" id="country1" class="form-control form-control-lg" placeholder="Country" required>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label class="form-label" for="state1">State *</label>
-                                <input type="text" name="state" id="state1" class="form-control form-control-lg" required>
+                                <label class="form-label" for="state1">State <span class="text-danger">*</span></label>
+                                <input type="text" name="state" id="state1" class="form-control form-control-lg" placeholder="State" required>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label class="form-label" for="city1">City *</label>
-                                <input type="text" name="city" id="city1" class="form-control form-control-lg" required>
+                                <label class="form-label" for="city1">City <span class="text-danger">*</span></label>
+                                <input type="text" name="city" id="city1" class="form-control form-control-lg" placeholder="City" required>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label class="form-label" for="locality1">Locality *</label>
-                                <input type="text" name="locality" id="locality1" class="form-control form-control-lg">
+                                <label class="form-label" for="locality1">Locality <span class="text-danger">*</span></label>
+                                <input type="text" name="locality" id="locality1" class="form-control form-control-lg" placeholder="Locality" required>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label class="form-label" for="street_no1">Street No *</label>
-                                <input type="text" name="street_no" id="street_no1" class="form-control form-control-lg">
+                                <label class="form-label" for="street_no1">Street No <span class="text-danger">*</span></label>
+                                <input type="text" name="street_no" id="street_no1" class="form-control form-control-lg" placeholder="Street No" required>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group">
-                                <label class="form-label" for="zipcode1">Zipcode *</label>
-                                <input type="text" name="zipcode" id="zipcode1" class="form-control form-control-lg">
+                                <label class="form-label" for="zipcode1">Zipcode <span class="text-danger">*</span></label>
+                                <input type="text" name="zipcode" id="zipcode1" class="form-control form-control-lg" placeholder="Zipcode" required>
                             </div>
                         </div>
                     </div>

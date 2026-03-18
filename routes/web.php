@@ -2,6 +2,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FrontController;
 use App\Http\Controllers\PayPalController;
+use App\Models\Product;
+use App\Services\Schema\ProductSchemaService;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,6 +18,12 @@ use App\Http\Controllers\PayPalController;
 //     return view('welcome');
 // });
 /* Front Panel */
+    Route::get('/test-schema/{id}', function ($id, ProductSchemaService $schemaService) {
+        $product = Product::findOrFail($id);
+
+        return response($schemaService->generate($product))
+            ->header('Content-Type', 'application/ld+json');
+    });
     // before login
         Route::match(['get', 'post'], '/', 'App\Http\Controllers\FrontController@home');
         Route::match(['get', 'post'], 'products/{id1}', 'App\Http\Controllers\FrontController@category');
@@ -23,6 +31,7 @@ use App\Http\Controllers\PayPalController;
         Route::match(['get', 'post'], 'product-sorting/{id1}/{id2}', 'App\Http\Controllers\FrontController@productSorting');
         Route::match(['get', 'post'], 'product/{id1}/{id2}', 'App\Http\Controllers\FrontController@productDetails');
         Route::match(['get', 'post'], 'get-size-wise-attributes', 'App\Http\Controllers\FrontController@getSizeWiseAttributes');
+        Route::match(['get', 'post'], 'get-variation-price', 'App\Http\Controllers\FrontController@getVariationPrice');
         Route::match(['get', 'post'], 'make-wishlist/{id1}', 'App\Http\Controllers\FrontController@makeWishlist');
         Route::match(['get', 'post'], 'add-to-cart', 'App\Http\Controllers\FrontController@addToCart');
         Route::match(['get', 'post'], 'cart', 'App\Http\Controllers\FrontController@cart');

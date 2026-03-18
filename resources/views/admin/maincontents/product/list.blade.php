@@ -183,7 +183,8 @@ $controllerRoute = $module['controller_route'];
          <div class="col-lg-6">
             <div class="row">
                <div class="col-lg-7">
-                  <form  class="header-search border rounded-5 " method="POST" >
+                  <form class="header-search border rounded-5" method="POST">
+                     @csrf
                      <button type="submit" class="btn btn-search"><i class="search-icon fas fa-search"></i></button>
                      <input type="text" list="browsers" id="searchText" placeholder="Search by title, tag or SKU" name="search">
                   </form>
@@ -561,7 +562,7 @@ $controllerRoute = $module['controller_route'];
 
       $('#suggestion-section').hide();
       $('#searchText').on('input', function(){
-         var baseUrl = '<?=url('admin//')?>';
+         var baseUrl = '<?=url('/')?>';
          var searchText = $('#searchText').val();
          if(searchText.length > 2){
             var settings = {

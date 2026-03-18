@@ -85,20 +85,41 @@ use App\Helpers\Helper;
             <div class="row">
                 <div class="col-lg-12">
                     <div class="form-group">
-                        <label class="form-label" for="old_password">Current password (leave blank to leave unchanged)</label>
-                        <input type="password" name="old_password" id="old_password" placeholder="************" class="form-control form-control-lg">
+                        <label class="form-label" for="old_password">Current password (Leave blank to leave unchanged)</label>
+                        <input type="password" name="old_password" id="old_password" placeholder="★★★★★★★★" class="form-control form-control-lg">
+                        <span class="flex justify-around items-center" style="position: absolute; top: 55px; right: 28px;">
+
+                        </span>
+                        <span class="toggle-password" onclick="togglePassword('old_password', this)"
+                            style="position:absolute; top:55px; right:28px; cursor:pointer;">
+                            👁
+                        </span>
                     </div>
                 </div>
                 <div class="col-lg-12">
                     <div class="form-group">
-                        <label class="form-label" for="new_password">New password (leave blank to leave unchanged)</label>
-                        <input type="password" name="new_password" id="new_password" placeholder="************" class="form-control form-control-lg">
+                        <label class="form-label" for="new_password">New password (Leave blank to leave unchanged)</label>
+                        <input type="password" name="new_password" id="new_password" placeholder="★★★★★★★★" class="form-control form-control-lg">
+                        <span class="flex justify-around items-center" style="position: absolute; top: 144px; right: 28px;">
+
+                        </span>
+                        <span class="toggle-password" onclick="togglePassword('new_password', this)"
+                            style="position:absolute; top:144px; right:28px; cursor:pointer;">
+                            👁
+                        </span>
                     </div>
                 </div>
                 <div class="col-lg-12">
                     <div class="form-group">
                         <label class="form-label" for="confirm_password">Confirm new password</label>
-                        <input type="password" name="confirm_password" id="confirm_password" placeholder="************" class="form-control form-control-lg">
+                        <input type="password" name="confirm_password" id="confirm_password" placeholder="★★★★★★★★" class="form-control form-control-lg">
+                        <span class="flex justify-around items-center" style="position: absolute; top: 234px; right: 28px;">
+
+                        </span>
+                        <span class="toggle-password" onclick="togglePassword('confirm_password', this)"
+                            style="position:absolute; top:234px; right:28px; cursor:pointer;">
+                            👁
+                        </span>
                     </div>
                 </div>
                 <div class="col-lg-12">
@@ -108,3 +129,15 @@ use App\Helpers\Helper;
         </div>
     </div>
 </form>
+<script>
+    function togglePassword(fieldId, icon) {
+        const input = document.getElementById(fieldId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.textContent = "🙈"; // change icon
+        } else {
+            input.type = "password";
+            icon.textContent = "👁"; // change back
+        }
+    }
+</script>

@@ -21,7 +21,7 @@ use App\Helpers\Helper;
                 <div class="category_product_box">
                     <div class="row">
                         <?php
-                        if($products){ foreach($products as $product){
+                        if(count($products) > 0){ foreach($products as $product){
                             $reviewCount            = UserReview::where('product_id', '=', $product->id)->where('status', '=', 1)->count();
                             $reviewSum              = UserReview::where('product_id', '=', $product->id)->where('status', '=', 1)->sum('rating');
                             $avgRating              = (($reviewCount > 0)?($reviewSum / $reviewCount):0);
@@ -97,18 +97,20 @@ use App\Helpers\Helper;
                                     </div>
                                 </div>
                             </div>
-                        <?php } }?>
+                        <?php } } else {?>
+                            <h6 class="text-danger" style="margin-bottom: 210px;">There are no products available</h6>
+                        <?php }?>
 
-                        {{-- Bootstrap styled pagination --}}
-                        <div class="d-flex justify-content-center mt-3">
-                            {{ $products->links() }}
-                        </div>
-
-                        {{-- Show page info --}}
-                        <p class="text-muted text-center mt-2 fw-bold">
-                            Page {{ $products->currentPage() }} of {{ $products->lastPage() }}  
-                            (Total records: {{ $products->total() }})
-                        </p>
+                        <?php if(count($products) > 0){?>
+                            <div class="d-flex justify-content-center mt-3">
+                                {{ $products->links() }}
+                            </div>
+                            
+                            <p class="text-muted text-center mt-2 fw-bold">
+                                Page {{ $products->currentPage() }} of {{ $products->lastPage() }}  
+                                (Total records: {{ $products->total() }})
+                            </p>
+                        <?php }?>
                     </div>
                 </div>
             </div>

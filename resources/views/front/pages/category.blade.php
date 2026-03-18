@@ -13,26 +13,37 @@ use App\Helpers\Helper;
        color: #000306;
    }
 </style>
+<?php
+$current_url = url()->full();
+?>
 <section class="category_section">
     <div class="container">
         <h3 class="mb-3"><?=$page_header?></h3>
         <div class="row">
             <div class="col-md-4 col-lg-3 mb-3 mb-md-0">
                 <div class="left-sidebar">
-                    <h3><img src="<?=env('FRONT_ASSETS_URL')?>images/grid_icon.png" alt="icon"> All Sub Categories
-                        <button>Clear</button>
+                    <h3>
+                        <img src="<?=env('FRONT_ASSETS_URL')?>images/grid_icon.png" alt="icon"> All Sub Categories
+                        <a href="<?= $current_url ?>"><button>Clear</button></a>
                     </h3>
+                    <?php
+                    // print_r($filter_subcat);
+                    ?>
                     <div class="accordion">
-                        <ul>
-                            <?php if($subcategory){ foreach($subcategory as $subcat){?>
-                                <li>
-                                    <button>
-                                        <?=$subcat->category_name?>
-                                        <input type="checkbox" name="subcat[]" id="<?=$subcat->id?>" class="ms-auto">
-                                    </button>
-                                </li>
-                            <?php } }?>
-                        </ul>
+                        <form action="" method="POST">
+                            @csrf
+                            <ul>
+                                <?php if($subcategory){ foreach($subcategory as $subcat){?>
+                                    <li>
+                                        <button>
+                                            <?=$subcat->category_name?>
+                                            <input type="checkbox" name="subcat[]" value="<?=$subcat->id?>" id="<?=$subcat->id?>" class="ms-auto" <?= ((in_array($subcat->id, $filter_subcat))?'checked':'') ?>>
+                                        </button>
+                                    </li>
+                                <?php } }?>
+                            </ul>
+                            <button type="submit" class="btn common-btn" style="display: flex;margin: 0 auto;">Filter</button>
+                        </form>
                     </div>
                 </div>
             </div>

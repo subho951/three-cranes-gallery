@@ -16,10 +16,10 @@
                         @csrf
                         <input type="hidden" name="id" value="<?=$id?>">
                         <div class="form-outline mb-3">
-                            <label class="form-label" for="otp1">OTP 1 <span class="text-danger">*</span></label>
-                            <input type="text" id="otp1" class="form-control form-control-lg" name="otp1" minlength="1" maxlength="1" min="0" oninput="moveFocus(1)" onkeypress="return isNumber(event)" required />
+                            <label class="form-label" for="otp1">OTP <span class="text-danger">*</span></label>
+                            <input type="text" id="otp1" class="form-control form-control-lg" name="otp1" minlength="4" maxlength="4" placeholder="OTP" onkeypress="return isNumber(event)" required />
                         </div>
-                        <div class="form-outline mb-3">
+                        <!-- <div class="form-outline mb-3">
                             <label class="form-label" for="otp2">OTP 2 <span class="text-danger">*</span></label>
                             <input type="text" id="otp2" class="form-control form-control-lg" name="otp2" minlength="1" maxlength="1" min="0" oninput="moveFocus(2)" onkeypress="return isNumber(event)" required />
                         </div>
@@ -30,7 +30,7 @@
                         <div class="form-outline mb-3">
                             <label class="form-label" for="otp4">OTP 4 <span class="text-danger">*</span></label>
                             <input type="text" id="otp4" class="form-control form-control-lg" name="otp4" minlength="1" maxlength="1" min="0" oninput="moveFocus(4)" onkeypress="return isNumber(event)" required />
-                        </div>
+                        </div> -->
                         <div class="d-flex mt-4">
                             <button type="submit" class="btn common-btn">Validate</button>
                         </div>

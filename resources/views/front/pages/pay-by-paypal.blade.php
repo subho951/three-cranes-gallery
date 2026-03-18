@@ -95,8 +95,8 @@ function formatCartItems($items) {
             <!-- <div class="col-12 col-lg-8 col-xl-8 col-md-8 col-sm-12">
                
             </div> -->
-            <div class="col-xl-3 col-lg-3 col-md-3 col-3"></div>
-            <div class="col-xl-6 col-lg-6 col-md-6 col-6">
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12"></div>
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                <div class="checkout-review-order-table-wrapper">
                   <div class="title-product-name">Products</div>
                   <div class="shop_table">
@@ -178,12 +178,12 @@ function formatCartItems($items) {
                   </div>
                   <div id="payment" class="checkout-payment">
                      <div class="form-row place-order">
-                        <a href="<?=url('paypal/payment/'.Helper::encoded($id))?>" class="button btn-place-order common-btn" style="text-align: center;">Pay $<?=(($getOrder)?number_format($getOrder->net_amt,2):0)?></a>
+                        <a href="<?=url('paypal/payment/'.Helper::encoded($id))?>" class="button btn-place-order common-btn" style="text-align: center;color:#FFF;">Pay $<?=(($getOrder)?number_format($getOrder->net_amt,2):0)?></a>
                      </div>
                   </div>
                </div>
             </div>
-            <div class="col-xl-3 col-lg-3 col-md-3 col-3"></div>
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12"></div>
          </div>
    </div>
 </section>

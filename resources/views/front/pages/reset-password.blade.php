@@ -17,16 +17,32 @@
                         <input type="hidden" name="id" value="<?=$id?>">
                         <div class="form-outline mb-3">
                             <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
-                            <input type="password" id="password" class="form-control form-control-lg" name="password" minlength="8" required />
+                            <input type="password" id="password" class="form-control form-control-lg" name="password" minlength="8" placeholder="Password" required />
+                            <span class="flex justify-around items-center"
+                                style="position: absolute; top: 43px; right: 18px;">
+
+                            </span>
+                            <span class="toggle-password" onclick="togglePassword('password', this)"
+                                style="position:absolute; top:43px; right:18px; cursor:pointer;">
+                                👁
+                            </span>
                         </div>
                         <div class="form-outline mb-3">
                             <label class="form-label" for="confirm_password">Confirm Password <span class="text-danger">*</span></label>
-                            <input type="password" id="confirm_password" class="form-control form-control-lg" name="confirm_password" minlength="8" required />
+                            <input type="password" id="confirm_password" class="form-control form-control-lg" name="confirm_password" minlength="8" placeholder="Confirm Password" required />
+                            <span class="flex justify-around items-center"
+                                style="position: absolute; top: 43px; right: 18px;">
+
+                            </span>
+                            <span class="toggle-password" onclick="togglePassword('confirm_password', this)"
+                                style="position:absolute; top:43px; right:18px; cursor:pointer;">
+                                👁
+                            </span>
                         </div>
                         <div class="d-flex mt-4">
                             <button type="submit" class="btn common-btn">Reset</button>
                         </div>
-                        <p class="reg-informaton mt-3 mb-0 ">"Create a new password to secure your account and complete the process.”
+                        <p class="reg-informaton mt-3 mb-0 ">Create a new password to secure your account and complete the process.
                         </p>
                     </form>
                 </div>
@@ -43,5 +59,17 @@
             return false;
         }
         return true;
+    }
+</script>
+<script>
+    function togglePassword(fieldId, icon) {
+        const input = document.getElementById(fieldId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.textContent = "🙈"; // change icon
+        } else {
+            input.type = "password";
+            icon.textContent = "👁"; // change back
+        }
     }
 </script>

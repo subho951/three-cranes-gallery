@@ -98,8 +98,8 @@ function formatCartItems($items)
       <input type="hidden" name="order_id" value="<?= (($getOrder) ? $getOrder->id : 0) ?>">
       <input type="hidden" name="net_amt" value="<?= (($getOrder) ? $getOrder->net_amt : 0) ?>">
       <div class="row justify-content-center">
-         <div class="col-xl-3 col-lg-3 col-md-3 col-3"></div>
-         <div class="col-xl-6 col-lg-6 col-md-6 col-6">
+         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12"></div>
+         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
             <div class="checkout-review-order-table-wrapper">
                <div class="title-product-name">Products</div>
                <div class="shop_table">
@@ -214,12 +214,12 @@ function formatCartItems($items)
                      $order_no = (($getOrder) ? $getOrder->order_no : '');
                      $orderid = (($getOrder) ? $getOrder->id : '');
                      ?>
-                     <a href="{{ route('stripe.checkout',['price' => $net_tot,'product' => $order_no,'orderid' => $orderid]) }}" class="button btn-place-order common-btn text-center">Pay $<?= number_format($net_tot, 2) ?></a>
+                     <a href="{{ route('stripe.checkout',['price' => $net_tot,'product' => $order_no,'orderid' => $orderid]) }}" class="button btn-place-order common-btn text-center" style="color:#FFF;">Pay $<?= number_format($net_tot, 2) ?></a>
                   </div>
                </div>
             </div>
          </div>
-         <div class="col-xl-3 col-lg-3 col-md-3 col-3"></div>
+         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12"></div>
       </div>
       <!-- </form> -->
    </div>

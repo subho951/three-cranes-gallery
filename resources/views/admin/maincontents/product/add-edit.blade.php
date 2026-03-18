@@ -412,7 +412,16 @@ $controllerRoute = $module['controller_route'];
                   <hr class="mb-3">
                   <h5 class="sub-title">Child Category<span style="color:red;">*</span></h5>
                   <div id="search-wrapper" class="border rounded-4 category-search mb-5">
-                     <?=(($GetChildCategory)?$GetChildCategory->category_name:'')?>
+                     <?//=(($GetChildCategory)?$GetChildCategory->category_name:'')?>
+                     <select class="form-select" aria-label="Default select example" id="sub_category" name="sub_category">
+                        <option value="" selected>Sub Categories</option>
+                        <?php if($subcategories){ foreach($subcategories as $subcategory){?>
+                           <?php
+                           $getParentCategory = Category::select('id', 'category_name')->where('status', '=', 1)->where('id', '=', $subcategory->parent_id)->first();
+                           ?>
+                           <option value="<?=$subcategory->id?>" <?=(($subcategory->id == $sub_category)?'selected':'')?>><?=(($getParentCategory)?$getParentCategory->category_name:'')?> - <?=$subcategory->category_name?></option>
+                        <?php } }?>
+                     </select>
                   </div>
                   <hr class="mb-3">
                </div>

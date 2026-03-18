@@ -153,10 +153,10 @@ class PayPalController extends Controller
             OrderDetail::where('order_id', '=', $id)->update(['is_cart' => 0]);
             $order_id = $id;
             $getOrder   = DB::table('orders')
-                                    ->join('users', 'orders.cust_id', '=', 'users.id')
-                                    ->select('orders.*', 'users.first_name', 'users.last_name', 'users.email')
-                                    ->where('orders.id', '=', $order_id)
-                                    ->first();
+                // ->join('users', 'orders.cust_id', '=', 'users.id')
+                ->select('orders.*')
+                ->where('orders.id', '=', $order_id)
+                ->first();
             /* generate inspection pdf & save it to directory */
                 $enquiry_no                     = (($getOrder)?$getOrder->order_no:'');
                 $data['generalSetting']         = GeneralSetting::find('1');

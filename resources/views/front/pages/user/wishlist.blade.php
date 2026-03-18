@@ -41,7 +41,7 @@ use App\Helpers\Helper;
                             <a href="<?= url('product/' . (($getProduct) ? $getProduct->slug : '') . '/' . Helper::encoded($row->product_id)) ?>" target="_blank"><?= (($getProduct) ? $getProduct->name : '') ?></a>
                         </td>
                         <td>
-                            <span>$<?= (($getProduct) ? number_format($getProduct->base_price, 2) : 0.00) ?></span>
+                            <span>$<?= (($getProduct) ? number_format($getProduct->discounted_price, 2) : 0.00) ?></span>
                         </td>
                         <td>
                             <?= date_format(date_create($row->created_at), "M d, Y h:i A") ?>
@@ -61,7 +61,7 @@ use App\Helpers\Helper;
                 <?php }
             } else { ?>
                 <tr>
-                    <td colspan="6" style="text-align:center; color: red;">Your wishlist is empty… for now.</td>
+                    <td colspan="6" style="text-align:center; color: red;">Your wishlist is empty for now.</td>
                 </tr>
             <?php } ?>
         </tbody>

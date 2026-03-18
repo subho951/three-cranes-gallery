@@ -78,7 +78,7 @@ use App\Helpers\Helper;
                         <?php }
                     } else { ?>
                         <tr>
-                            <td colspan="5" style="text-align:center; color: red;">Nothing here… yet!</td>
+                            <td colspan="5" style="text-align:center; color: red;">Nothing here yet!</td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -112,7 +112,7 @@ use App\Helpers\Helper;
                         <?php }
                     } else { ?>
                         <tr>
-                            <td colspan="5" style="text-align:center; color: red;">Nothing here… yet!</td>
+                            <td colspan="5" style="text-align:center; color: red;">Nothing here yet!</td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -146,7 +146,7 @@ use App\Helpers\Helper;
                         <?php }
                     } else { ?>
                         <tr>
-                            <td colspan="5" style="text-align:center; color: red;">Nothing here… yet!</td>
+                            <td colspan="5" style="text-align:center; color: red;">Nothing here yet!</td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -180,7 +180,7 @@ use App\Helpers\Helper;
                         <?php }
                     } else { ?>
                         <tr>
-                            <td colspan="5" style="text-align:center; color: red;">Nothing here… yet!</td>
+                            <td colspan="5" style="text-align:center; color: red;">Nothing here yet!</td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -214,7 +214,7 @@ use App\Helpers\Helper;
                         <?php }
                     } else { ?>
                         <tr>
-                            <td colspan="5" style="text-align:center; color: red;">Nothing here… yet!</td>
+                            <td colspan="5" style="text-align:center; color: red;">Nothing here yet!</td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -248,7 +248,7 @@ use App\Helpers\Helper;
                         <?php }
                     } else { ?>
                         <tr>
-                            <td colspan="5" style="text-align:center; color: red;">Nothing here… yet!</td>
+                            <td colspan="5" style="text-align:center; color: red;">Nothing here yet!</td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -282,7 +282,7 @@ use App\Helpers\Helper;
                         <?php }
                     } else { ?>
                         <tr>
-                            <td colspan="5" style="text-align:center; color: red;">Nothing here… yet!</td>
+                            <td colspan="5" style="text-align:center; color: red;">Nothing here yet!</td>
                         </tr>
                     <?php } ?>
                 </tbody>

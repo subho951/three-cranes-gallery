@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers\Admin;
+use App\Services\Schema\ProductSchemaService;
 
 use App\Helpers\Helper as HelpersHelper;
 use App\Http\Controllers\Controller;
@@ -22,15 +23,20 @@ use App\Models\ReturnPolicy;
 use App\Models\ProductVariation;
 use App\Models\VariationAttribute;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Imagick\Driver;
+
 use Auth;
 use Session;
 use Helper;
 use Hash;
-use DB;
+
 class ProductController extends Controller
 {
     public function __construct()
-    {        
+    {
         $this->data = array(
             'title'             => 'Product',
             'controller'        => 'ProductController',
@@ -48,7 +54,7 @@ class ProductController extends Controller
                                                     ->select('products.*', 'categories.category_name as sub_category_name')
                                                     ->where('products.status', '!=', 3)
                                                     ->orderBy('products.id', 'DESC')
-                                                    ->paginate(8);
+                                                    ->paginate(30);
                                                     // ->get();
             $data['total_products']        = DB::table('products')->where('products.status', '!=', 3)->count();
 
@@ -140,7 +146,7 @@ class ProductController extends Controller
                                                     ->select('products.*', 'categories.category_name as sub_category_name')
                                                     ->where('products.status', '!=', 3)
                                                     ->orderBy('products.id', 'DESC')
-                                                    ->paginate(8);
+                                                    ->paginate(30);
                                                     // ->get();
             $generalSetting                 = GeneralSetting::find('1');
             $data['view_type']              = $generalSetting->product_view;
@@ -198,7 +204,7 @@ class ProductController extends Controller
                                                     ->select('products.*', 'categories.category_name as sub_category_name')
                                                     ->where('products.status', '!=', 3)
                                                     ->orderBy('products.' . $orderField, $orderType)
-                                                    ->paginate(8);
+                                                    ->paginate(30);
                                                     // ->get();
                 $data['filter_by']              = $filter_by;
                 $data['filter']                 = -1;
@@ -259,7 +265,7 @@ class ProductController extends Controller
                                                     ->select('products.*', 'categories.category_name as sub_category_name')
                                                     ->where('products.status', '!=', 3)
                                                     ->orderBy('products.id', 'DESC')
-                                                    ->paginate(8);
+                                                    ->paginate(30);
                                                     // ->get();
             $data['total_products']         = DB::table('products')->where('products.status', '!=', 3)->count();
 
@@ -309,7 +315,7 @@ class ProductController extends Controller
                                                     ->select('products.*', 'categories.category_name as sub_category_name')
                                                     ->where('products.status', '=', $listing_status)
                                                     ->orderBy('products.id', 'DESC')
-                                                    ->paginate(8);
+                                                    ->paginate(30);
                                                     // ->get();
                 $data['filter']                 = $listing_status;
                 $data['filter_by']              = '';
@@ -380,7 +386,7 @@ class ProductController extends Controller
                                                     ->select('products.*', 'categories.category_name as sub_category_name')
                                                     ->where('products.status', '!=', 3)
                                                     ->orderBy('products.id', 'DESC')
-                                                    ->paginate(8);
+                                                    ->paginate(30);
                                                     // ->get();
             $data['total_products']         = DB::table('products')->where('products.status', '!=', 3)->count();
 
@@ -420,11 +426,14 @@ class ProductController extends Controller
             $data['categories']                 = $categories;
 
             $postData                           = $request->all();
+          	
+          
             $listing_category                   = $request->listing_category;
             $category_name                      = $request->category_name;
+          	//Helper::pr($category_name,0);
+            //Helper::pr($postData);
             $final_category_name                = $category_name[$listing_category][0];
-            // Helper::pr($category_name,0);
-            // Helper::pr($postData);
+            
 
             if($postData['mode'] == 'category'){
                 $data['rows']                   = DB::table('products')
@@ -433,7 +442,7 @@ class ProductController extends Controller
                                                     ->where('products.status', '!=', 3)
                                                     ->where('products.sub_category', '=', $listing_category)
                                                     ->orderBy('products.id', 'DESC')
-                                                    ->paginate(8);
+                                                    ->paginate(30);
                 $data['filter']                 = $listing_category;
                 $data['filter_by']              = '';
                 $data['total_products']         = DB::table('products')->where('products.status', '!=', 3)->where('products.sub_category', '=', $listing_category)->count();
@@ -642,32 +651,75 @@ class ProductController extends Controller
                         
                     /* variation */
                     // other images
-                        if(array_key_exists("product_image",$postData)){
+                        // if(array_key_exists("product_image",$postData)){
+                        //     $other_images                       = $postData['product_image'];
+                        //     $images                             = [];
+                        //     $image_array                        = $request->file('product_image');
+                        //     if(!empty($image_array)){
+                        //         $uploadedFile       = $this->commonFileArrayUpload('public/uploads/product/', $image_array, 'image');
+                        //         if(!empty($uploadedFile)){
+                        //             $images    = $uploadedFile;
+                        //         } else {
+                        //             $images    = [];
+                        //         }
+                        //     }
+                        //     // Helper::pr($images);
+                        //     if(!empty($images)){
+                        //         for($i=0;$i<count($images);$i++){
+                        //             $fields2 = [
+                        //                 'product_id'            => $product_id,
+                        //                 'image'                 => $images[$i]
+                        //             ];
+                        //             ProductImage::insert($fields2);
+                        //             if($i == 0){
+                        //                 $fields3 = [
+                        //                     'cover_image'                 => $images[$i]
+                        //                 ];
+                        //                 Product::where($this->data['primary_key'], '=', $id)->update($fields3);
+                        //             }
+                        //         }
+                        //     }
+                        // }
+                        if ($request->hasFile('product_image')) {
                             $other_images                       = $postData['product_image'];
-                            $images                             = [];
-                            $image_array                        = $request->file('product_image');
-                            if(!empty($image_array)){
-                                $uploadedFile       = $this->commonFileArrayUpload('public/uploads/product/', $image_array, 'image');
-                                if(!empty($uploadedFile)){
-                                    $images    = $uploadedFile;
-                                } else {
-                                    $images    = [];
-                                }
-                            }
-                            // Helper::pr($images);
-                            if(!empty($images)){
-                                for($i=0;$i<count($images);$i++){
-                                    $fields2 = [
-                                        'product_id'            => $product_id,
-                                        'image'                 => $images[$i]
-                                    ];
-                                    ProductImage::insert($fields2);
-                                    if($i == 0){
-                                        $fields3 = [
-                                            'cover_image'                 => $images[$i]
-                                        ];
-                                        Product::where($this->data['primary_key'], '=', $id)->update($fields3);
-                                    }
+                            // $request->validate([
+                            //     'product_image'     => 'required|array|min:1',
+                            //     'product_image.*'   => 'image|mimes:jpg,jpeg,png,webp|max:2048', // 2MB upload limit
+                            // ]);
+                            
+                            $manager = new ImageManager(new Driver());
+                            $images  = [];
+
+                            foreach ($request->file('product_image') as $key => $file) {
+
+                                $image = $manager->read($file->getRealPath());
+
+                                // Resize (maintain aspect ratio)
+                                $image->scaleDown(1200);
+
+                                $filename = uniqid('product_') . '.webp';
+                                $path     = public_path('uploads/product/' . $filename);
+
+                                // Compress until under 50 KB
+                                $quality = 80;
+                                do {
+                                    $image->toWebp($quality)->save($path);
+                                    $size = filesize($path);
+                                    $quality -= 5;
+                                } while ($size > 51200 && $quality > 10); // 50 KB
+
+                                $images[] = $filename;
+
+                                // Insert into product_images table
+                                ProductImage::create([
+                                    'product_id' => $product_id,
+                                    'image'      => $filename,
+                                ]);
+
+                                // Set first image as cover
+                                if ($key === 0) {
+                                    Product::where('id', $product_id)
+                                        ->update(['cover_image' => $filename]);
                                 }
                             }
                         }
@@ -712,6 +764,7 @@ class ProductController extends Controller
             $data['subcategories']          = Category::select('id', 'category_name', 'parent_id')->where('status', '=', 1)->where('parent_id', '>', 0)->get();
             $data['materials']              = Material::select('id', 'name')->where('status', '=', 1)->get();
             $data['returnPolicies']         = ReturnPolicy::select('id', 'name', 'type', 'timeframe', 'description')->where('status', '=', 1)->get();
+            $data['subcategories']          = Category::select('id', 'category_name', 'parent_id')->where('status', '=', 1)->where('parent_id', '>', 0)->get();
 
             $product_session_data = [
                 'who_made_it'       => $data['row']->who_made_it,
@@ -766,7 +819,7 @@ class ProductController extends Controller
                 ];
                 if($this->validate($request, $rules)){
                     $product_session_data   = session('product_session_data');
-                    $sub_category           = $product_session_data['sub_category'];
+                    $sub_category           = $postData['sub_category'];
                     $getParentCategory      = Category::select('id', 'category_name', 'parent_id')->where('id', '=', $sub_category)->first();
                     if($postData['product_video'] != ''){
                         $product_video      = $postData['product_video'];
@@ -902,32 +955,76 @@ class ProductController extends Controller
                         }
                     /* variation */
                     // other images
-                        if(array_key_exists("product_image",$postData)){
+                        // if(array_key_exists("product_image",$postData)){
+                        //     $other_images                       = $postData['product_image'];
+                        //     $images                             = [];
+                        //     $image_array                        = $request->file('product_image');
+                        //     if(!empty($image_array)){
+                        //         $uploadedFile       = $this->commonFileArrayUpload('public/uploads/product/', $image_array, 'image');
+                        //         if(!empty($uploadedFile)){
+                        //             $images    = $uploadedFile;
+                        //         } else {
+                        //             $images    = [];
+                        //         }
+                        //     }
+                        //     // Helper::pr($images);
+                        //     if(!empty($images)){
+                        //         for($i=0;$i<count($images);$i++){
+                        //             $fields2 = [
+                        //                 'product_id'            => $product_id,
+                        //                 'image'                 => $images[$i]
+                        //             ];
+                        //             ProductImage::insert($fields2);
+                        //             // if($i == 0){
+                        //             //     $fields3 = [
+                        //             //         'cover_image'                 => $images[$i]
+                        //             //     ];
+                        //             //     Product::where($this->data['primary_key'], '=', $id)->update($fields3);
+                        //             // }
+                        //         }
+                        //     }
+                        // }
+                        if ($request->hasFile('product_image')) {
                             $other_images                       = $postData['product_image'];
-                            $images                             = [];
-                            $image_array                        = $request->file('product_image');
-                            if(!empty($image_array)){
-                                $uploadedFile       = $this->commonFileArrayUpload('public/uploads/product/', $image_array, 'image');
-                                if(!empty($uploadedFile)){
-                                    $images    = $uploadedFile;
-                                } else {
-                                    $images    = [];
-                                }
-                            }
-                            // Helper::pr($images);
-                            if(!empty($images)){
-                                for($i=0;$i<count($images);$i++){
-                                    $fields2 = [
-                                        'product_id'            => $product_id,
-                                        'image'                 => $images[$i]
-                                    ];
-                                    ProductImage::insert($fields2);
-                                    // if($i == 0){
-                                    //     $fields3 = [
-                                    //         'cover_image'                 => $images[$i]
-                                    //     ];
-                                    //     Product::where($this->data['primary_key'], '=', $id)->update($fields3);
-                                    // }
+                            
+                            // $request->validate([
+                            //     'product_image'     => 'required|array|min:1',
+                            //     'product_image.*'   => 'image|mimes:jpg,jpeg,png,webp|max:2048', // 2MB upload limit
+                            // ]);
+
+                            $manager = new ImageManager(new Driver());
+                            $images  = [];
+
+                            foreach ($request->file('product_image') as $key => $file) {
+
+                                $image = $manager->read($file->getRealPath());
+
+                                // Resize (maintain aspect ratio)
+                                $image->scaleDown(1200);
+
+                                $filename = uniqid('product_') . '.webp';
+                                $path     = public_path('uploads/product/' . $filename);
+
+                                // Compress until under 50 KB
+                                $quality = 80;
+                                do {
+                                    $image->toWebp($quality)->save($path);
+                                    $size = filesize($path);
+                                    $quality -= 5;
+                                } while ($size > 51200 && $quality > 10); // 50 KB
+
+                                $images[] = $filename;
+
+                                // Insert into product_images table
+                                ProductImage::create([
+                                    'product_id' => $product_id,
+                                    'image'      => $filename,
+                                ]);                                
+
+                                // Set first image as cover
+                                if ($key === 0) {
+                                    Product::where('id', $product_id)
+                                        ->update(['cover_image' => $filename]);
                                 }
                             }
                         }
@@ -984,6 +1081,34 @@ class ProductController extends Controller
             $newRow = $row->replicate();
             $newRow->status = 0; // Example modification
             $newRow->save();
+
+            // 3. Get the newly created product ID
+            $newProductId = $newRow->id;
+
+            // Get all related product attributes
+            $productAttributes = ProductAttribute::where('product_id', $id)->get();
+
+            // Loop and replicate each attribute row with the new product_id
+            foreach ($productAttributes as $attribute) {
+                $newAttribute = $attribute->replicate();
+                $newAttribute->product_id = $newProductId;
+                $newAttribute->save();
+            }
+
+            $productImages = ProductImage::where('product_id', $id)->get();
+            foreach ($productImages as $proImg) {
+                $newProductImage = $proImg->replicate();
+                $newProductImage->product_id = $newProductId;
+                $newProductImage->save();
+            }
+
+            $productVariations = ProductVariation::where('product_id', $id)->get();
+            foreach ($productVariations as $proVariation) {
+                $newProductVariation = $proVariation->replicate();
+                $newProductVariation->product_id = $newProductId;
+                $newProductVariation->save();
+            }
+
             return $newRow; // Return the newly created row
         }
     /* copy */

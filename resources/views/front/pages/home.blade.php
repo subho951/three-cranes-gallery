@@ -32,10 +32,12 @@ use App\Helpers\Helper;
     <div class="row">
       <?php if($sections2){ foreach($sections2 as $section2){?>
         <div class="col-lg-4 col-md-4">
-          <div class="summer-img">
-            <img src="<?=env('UPLOADS_URL').'/home_page/' . $section2->icon?>" alt="<?=$section2->name?>" class="img-fluid">
-            <p><?=$section2->name?></p>
-          </div>
+          <a href="<?=$section2->section2_link?>">
+            <div class="summer-img">
+              <img src="<?=env('UPLOADS_URL').'/home_page/' . $section2->icon?>" alt="<?=$section2->name?>" class="img-fluid">
+              <p><?=$section2->name?></p>
+            </div>
+          </a>
         </div>
       <?php } }?>
     </div>
@@ -74,7 +76,7 @@ use App\Helpers\Helper;
               <a href="<?=url('/product/' . $product->slug . '/' . Helper::encoded($product->id))?>"><?=$product->name?></a>
             </div>
             <div class="product-info-t">
-              <h5>$ <?=number_format($product->discounted_price,2)?>+</h5>
+              <h5>$ <?=number_format($product->discounted_price,2)?></h5>
               <?php
               $reviewCount            = UserReview::where('product_id', '=', $product->id)->where('status', '=', 1)->count();
               $reviewSum              = UserReview::where('product_id', '=', $product->id)->where('status', '=', 1)->sum('rating');
@@ -128,7 +130,7 @@ use App\Helpers\Helper;
           <img src="<?=env('UPLOADS_URL').'/home_page/' . $sections5[0]->icon?>" alt="<?=$sections5[0]->name?>" class="img-fluid">
           <div class="classic_info_box">
             <h4><?=$sections5[0]->name?></h4>
-            <a href="<?=$sections5[0]->section2_link?>">Shop Now</a>    
+            <a href="<?=$sections5[0]->section2_link?>">Shop Now</a>
           </div>
         </div>
       <?php }?>
@@ -139,7 +141,7 @@ use App\Helpers\Helper;
             <img src="<?=env('UPLOADS_URL').'/home_page/' . $sections5[2]->icon?>" alt="<?=$sections5[2]->name?>" class="img-fluid">
             <div class="classic_info_box">
               <h4><?=$sections5[2]->name?></h4>
-              <a href="<?=$sections5[2]->section2_link?>">Shop Now</a>    
+              <a href="<?=$sections5[2]->section2_link?>">Shop Now</a>
             </div>
           </div>
         <?php }?>
@@ -148,7 +150,7 @@ use App\Helpers\Helper;
             <img src="<?=env('UPLOADS_URL').'/home_page/' . $sections5[3]->icon?>" alt="<?=$sections5[3]->name?>" class="img-fluid">
             <div class="classic_info_box">
               <h4><?=$sections5[3]->name?></h4>
-              <a href="<?=$sections5[3]->section2_link?>">Shop Now</a>    
+              <a href="<?=$sections5[3]->section2_link?>">Shop Now</a>
             </div>
           </div>
         <?php }?>
@@ -159,7 +161,7 @@ use App\Helpers\Helper;
           <img src="<?=env('UPLOADS_URL').'/home_page/' . $sections5[1]->icon?>" alt="<?=$sections5[1]->name?>" class="img-fluid">
           <div class="classic_info_box">
             <h4><?=$sections5[1]->name?></h4>
-            <a href="<?=$sections5[1]->section2_link?>">Shop Now</a>    
+            <a href="<?=$sections5[1]->section2_link?>">Shop Now</a>
           </div>
         </div>
       <?php }?>

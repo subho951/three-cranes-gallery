@@ -1,3 +1,10 @@
+
+@section('head')
+<script type="application/ld+json">
+{!! $schema !!}
+</script>
+@endsection
+
 <?php
 use App\Models\Category;
 use App\Models\Product;
@@ -117,21 +124,21 @@ use App\Helpers\Helper;
                                     </ul>
                                 </li>
                                 <li><span><?=$avgRating?></span></li>
-                                <li><label><?=$reviewCount?> <button>(Reviews)</button></label></li>
+                                <li><label><?=$reviewCount?> reviews</label></li>
                                 <li><label>SKU:</label><b> <?=$product->product_sku?></b></li>
                             </ul>
                             <div>
                                 <?=$product->short_description?>
                             </div>
-                            <h5>$<!-- --><?=number_format($product->discounted_price,2)?> <span>$ <?=number_format($product->markup_price,2)?></span></h5>
-                            <input type="hidden" name="product_price" value="<?=$product->discounted_price?>">
+                            <h5>$ <span id="product_price_text"><?=number_format($product->discounted_price,2)?></span> <span>$ <?=number_format($product->markup_price,2)?></span></h5>
+                            <input type="hidden" name="product_price" id="product_price" value="<?=$product->discounted_price?>">
                             <?php if(!empty($variations)){?>
                                 <ul class="product-varient mt-2">
                                     <?php foreach($variations as $variation){?>
                                         <li>
                                             <label> Select <?=$variation['attr_name']?></label>
                                             <input type="hidden" name="attr_id[]" value="<?=$variation['attr_id']?>">
-                                            <select class="form-control" name="variations[]" required>
+                                            <select class="form-select" name="variations[]" onchange="getSizeWisePrice(<?= $product_id ?>, <?=$variation['attr_id']?>, this.value);" required>
                                                 <option value="" selected>Select <?=$variation['attr_name']?></option>
                                                 <?php
                                                 $attr_vals = $variation['attr_vals'];
@@ -226,7 +233,7 @@ use App\Helpers\Helper;
                                 <h5 class="mt-3">Reviews</h5>
                                 <?php
                                 $reviews            = UserReview::where('product_id', '=', $product->id)->where('status', '=', 1)->orderBy('id', 'DESC')->get();
-                                if($reviews){ foreach($reviews as $review){
+                                if(count($reviews) > 0){ foreach($reviews as $review){
                                 ?>
                                     <div class="reviewList">
                                         <div class="user-i"><img src="<?=env('FRONT_ASSETS_URL')?>images/testimonial-img.png">
@@ -270,7 +277,9 @@ use App\Helpers\Helper;
                                             <?php }?>
                                         </ul>
                                     </div>
-                                <?php } }?>
+                                <?php } } else {?>
+                                    <h6>No reviews yet</h6>
+                                <?php }?>
                             </div>
                             <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
                                 <div class="productattr">
@@ -323,21 +332,21 @@ use App\Helpers\Helper;
                                     <div class="product-box">
                                         <div class="product-img">
                                             <div class="product-img-box">
-                                                <a href="<?=url('/product/' . $product['slug'])?>">
+                                                <a href="<?=url('/product/' . $product['slug'] . '/' . Helper::encoded($product['id']))?>">
                                                     <img src="<?=env('UPLOADS_URL').'/product/' . $product['cover_image']?>" class="img-fluid" alt="<?=$product['name']?>">
                                                 </a>
                                             </div>
                                             <div class="add-callection">
-                                                <a href="<?=url('/product/' . $product['slug'])?>">Add to cart</a>
+                                                <a href="<?=url('/product/' . $product['slug'] . '/' . Helper::encoded($product['id']))?>">Add to cart</a>
                                             </div>
                                             <div class="whist_icon">
-                                                <a href="<?=url('/product/' . $product['slug'])?>">
+                                                <a href="<?=url('/product/' . $product['slug'] . '/' . Helper::encoded($product['id']))?>">
                                                     <img src="<?=env('FRONT_ASSETS_URL')?>images/heart_icon.png" alt="" class="heart_icon">
                                                 </a>
                                             </div>
                                         </div>
                                         <div class="product-info">
-                                            <a href="<?=url('/product/' . $product['slug'])?>"><?=$product['name']?></a>
+                                            <a href="<?=url('/product/' . $product['slug'] . '/' . Helper::encoded($product['id']))?>"><?=$product['name']?></a>
                                         </div>
                                         <div class="product-info-t">
                                             <h5>$ <?=number_format($product['discounted_price'],2)?>+</h5>
@@ -405,4 +414,35 @@ use App\Helpers\Helper;
         }
         minusBtn.disabled = qty <= 1;
     });
+</script>
+<script>
+function getSizeWisePrice(productId, parentAttrId, attrValId) {
+    if (!attrValId) return;
+
+    $.ajax({
+        url: '<?= url("get-variation-price") ?>',  // Laravel route
+        type: 'POST',
+        data: {
+            product_id: productId,
+            parent_attr_id: parentAttrId,
+            attr_val_id: attrValId,
+            _token: '<?= csrf_token() ?>'
+        },
+        beforeSend: function () {
+            // console.log('Fetching price...');
+        },
+        success: function (res) {
+            // console.log('API Response:', res);
+            if(res.status){
+                // product_price_text
+                // product_price
+                $('#product_price').val(res.data.discounted_price);
+                $('#product_price_text').text(res.data.discounted_price);
+            }
+        },
+        error: function (xhr) {
+            // console.error('API Error:', xhr.responseText);
+        }
+    });
+}
 </script>

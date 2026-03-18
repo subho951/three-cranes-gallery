@@ -3,7 +3,7 @@ use App\Helpers\Helper;
 use Illuminate\Support\Facades\Route;
 $currentFullURL = url()->full();
 $pageName     = explode("/", $currentFullURL);
-// Helper::pr($pageName,0);
+// Helper::pr($pageName);
 if(count($pageName) < 4){
    $pageSegment  = '';
 } elseif(count($pageName) >= 3){
@@ -18,7 +18,7 @@ if(count($pageName) < 4){
     <div class="panel-body ">
         <ul class="nav-side">
             <?php $currentUrl = url('user/addresses/'); ?>
-            <li class="active">
+            <li>
                 <a href="<?=url('user/dashboard')?>" <?=(($pageSegment == 'dashboard')?'class="active"':'')?>>
                     Dashboard 
                     <svg aria-hidden="true"

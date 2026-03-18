@@ -103,7 +103,7 @@ $controllerRoute = $module['controller_route'];
               <div class="col-md-10 col-lg-10">
                 <textarea name="description" class="form-control" id="ckeditor1" rows="3"><?=$description?></textarea>
               </div>
-            </div>
+            </div> -->
             <div class="row mb-3">
               <label for="meta_title" class="col-md-2 col-lg-2 col-form-label">Meta Title</label>
               <div class="col-md-10 col-lg-10">
@@ -121,7 +121,7 @@ $controllerRoute = $module['controller_route'];
               <div class="col-md-10 col-lg-10">
                 <textarea name="meta_keywords" class="form-control" id="meta_keywords" rows="3"><?=$meta_keywords?></textarea>
               </div>
-            </div> -->
+            </div>
             <div class="text-center">
               <button type="submit" class="btn btn-primary"><?=(($row)?'Save':'Add')?></button>
             </div>

@@ -2,10 +2,18 @@
 <html lang="en">
 
 <head>
-  <?= $head ?>
+  <link rel="canonical" href="{{ url()->current() }}" />
+  {!! $head ?? '' !!}
+  @yield('head')
 </head>
 
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframesrc="https://www.googletagmanager.com/ns.html?id=GTM-WMNF55CW"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+
   <!-- header start -->
   <div class="header">
     <?= $header ?>
@@ -31,7 +39,7 @@
         "debug": true,
         "newestOnTop": false,
         "progressBar": true,
-        "positionClass": "toast-bottom-left",
+        "positionClass": "toast-top-right",
         "preventDuplicates": false,
         "showDuration": "3000",
         "hideDuration": "1000000",
@@ -123,8 +131,8 @@
               search_result.forEach(item => {
                 $('#searchResults').append(`
                                             <li class="search-item">
-                                              <img src="${item.image}" alt="product" class="search-img">
-                                              <span class="search-text">${item.name}</span>
+                                              <a href="${item.frontend_product_link}"><img src="${item.cover_image}" alt="product" class="search-img"></a>
+                                              <a href="${item.frontend_product_link}"><span class="search-text">${item.name}</span></a>
                                             </li>
                                           `);
               });

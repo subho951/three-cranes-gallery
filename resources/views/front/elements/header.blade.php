@@ -1,6 +1,9 @@
 <?php
+use App\Models\User;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\OrderDetail;
+use App\Models\UserWishlist;
 use App\Helpers\Helper;
 ?>
 <div class="top-header">
@@ -8,7 +11,7 @@ use App\Helpers\Helper;
         <div class="row">
             <div class="col">
                 <div>
-                    <p>We deliver to you <span><?= $generalSetting->topbar_text ?></span></p>
+                    <p><span><?= $generalSetting->topbar_text ?></span></p>
                 </div>
             </div>
         </div>
@@ -18,7 +21,7 @@ use App\Helpers\Helper;
     <div class="container">
         <div class="row">
             <div class="col-lg-4 col-md-4 col-sm-4">
-                <div class="header_sign_content mb-3 mb-sm-0">
+                <div class="header_sign_content mb-0 mb-sm-0">
                     <!-- <a href="">Sign Up for Email</a> -->
                 </div>
             </div>
@@ -26,25 +29,44 @@ use App\Helpers\Helper;
                 <div class="header_location">
                     <ul>
                         <li><a class="nav-link p-0" href="<?= url('page/our-store') ?>"><i class="fa-solid fa-location-dot"></i></i>Our Store</a></li>
-                        <ul>
+                        <!-- <ul>
                             <li> <i class="fa-solid fa-earth-americas"></i></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link p-0" href="javascript:void(0);">
                                     US ($)
                                 </a>
-                                <!-- <a class="nav-link dropdown-toggle p-0" href="#" id="navbarDropdown" role="button"
+                                <a class="nav-link dropdown-toggle p-0" href="#" id="navbarDropdown" role="button"
                                   aria-expanded="false">
                                   IN ($)
-                              </a> -->
-                                <!-- <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                              </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                   <li><a class="dropdown-item" href="#">Action</a></li>
                                   <li><a class="dropdown-item" href="#">Another action</a></li>
-                              </ul> -->
+                              </ul>
                             </li>
-                        </ul>
+                        </ul> -->
                         <li>
                             <?php if(session('user_id')) {?>
-                                <a class="nav-link p-0" href="<?= url('user/dashboard') ?>"><i class="fa-solid fa-circle-user"></i>Welcome <?=session('name')?></a>
+                                <?php
+                                $customer_name = explode(" ", session('name'));
+                                $uId = session('user_id');
+                                $getUser = User::where('id', '=', $uId)->first();
+                                ?>
+                                <a class="nav-link p-0" href="<?= url('user/dashboard') ?>">
+                                    <!-- <i class="fa-solid fa-circle-user"></i><?=session('name')?> -->
+                                    <i class="top-icon">
+                                        <?php if($getUser){?>
+                                            <?php if($getUser->profile_image != ''){?>
+                                                <img class="img-fluid" src="<?=env('UPLOADS_URL').'user/'.$getUser->profile_image?>" alt="<?=(($getUser)?$getUser->display_name:'')?>" style="width: 30px; height: 30px; border-radius: 50%;">
+                                            <?php } else {?>
+                                                <i class="fa-solid fa-circle-user fa-2x"></i>
+                                            <?php } ?>
+                                        <?php } else {?>
+                                            <i class="fa-solid fa-circle-user fa-2x"></i>
+                                        <?php }?>
+                                    </i>
+                                    <?=(($getUser)?$getUser->display_name:'')?>
+                                </a>
                             <?php } else {?>
                                 <a class="nav-link p-0" href="<?= url('login') ?>"><i class="fa-solid fa-circle-user"></i>Signup/Signin</a>
                             <?php }?>
@@ -78,9 +100,25 @@ use App\Helpers\Helper;
                     </div>
                     <ul>
                         <?php if(session('user_id')) {?>
-                            <li><a href="<?=url('user/wishlist')?>"> <img src="<?= env('FRONT_ASSETS_URL') ?>images/heart_icon.png" alt="logo"></a></li>
+                            <li>
+                                <?php
+                                $user_id  = session('user_id');
+                                $wishlistCount = UserWishlist::where('user_id', '=', $user_id)->where('status', '=', 1)->count();
+                                ?>
+                                <a href="<?=url('user/wishlist')?>"> <img src="<?= env('FRONT_ASSETS_URL') ?>images/heart_icon.png" alt="logo">
+                                    <?php if($wishlistCount > 0){?><span><?=$wishlistCount?></span><?php } ?>
+                                </a>
+                            </li>
                         <?php }?>
-                        <li><a href="<?=url('cart')?>"> <img src="<?= env('FRONT_ASSETS_URL') ?>images/cart_icon.png" alt="logo"></a></li>
+                        <li>
+                            <?php
+                            $deviceId  = Helper::createDeviceFingerprint();
+                            $itemCount = OrderDetail::where('cust_device_id', '=', $deviceId)->where('is_cart', '=', 1)->where('status', '=', 0)->count();
+                            ?>
+                            <a href="<?=url('cart')?>"> <img src="<?= env('FRONT_ASSETS_URL') ?>images/cart_icon.png" alt="logo">
+                                <?php if($itemCount > 0){?><span><?=$itemCount?></span><?php } ?>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -93,7 +131,7 @@ use App\Helpers\Helper;
             <div class="col">
                 <div class="main_menu">
                     <nav class="navbar navbar-expand-md">
-                        <a class="navbar-brand d-block d-md-none" href="#">
+                        <a class="navbar-brand d-block d-md-none" href="<?= url('/') ?>">
                             <img alt="logo" class="logo img-fluid" src="<?= env('FRONT_ASSETS_URL') ?>images/logo.png">
                         </a>
                         <div class="button_container d-block d-md-none" id="toggle" type="button"
@@ -108,7 +146,8 @@ use App\Helpers\Helper;
                         <div class="collapse navbar-collapse" id="navbarNavDropdown">
                             <ul class="navbar-nav">
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link active" aria-current="page" href="<?= url('/') ?>" id="navbarDropdownMenuLink" role="button" aria-expanded="false">Home</a>
+                                     <!-- active -->
+                                    <a class="nav-link" aria-current="page" href="<?= url('/') ?>" id="navbarDropdownMenuLink" role="button" aria-expanded="false">Home</a>
                                 </li>
 
                                 <?php
@@ -133,7 +172,7 @@ use App\Helpers\Helper;
                                     <a class="nav-link dropdown-toggle" href="<?= url('whats-new') ?>" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         What's New
                                     </a>
-                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <ul class="dropdown-menu what_new_dropDown" aria-labelledby="navbarDropdownMenuLink">
                                         <?php
                                         $newProducts = Product::select('id', 'name', 'slug')->where('is_new', '=', 1)->where('status', '=', 1)->limit(10)->get();
                                         if($newProducts){ foreach($newProducts as $product){
