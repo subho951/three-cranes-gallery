@@ -3,6 +3,110 @@
 <script type="application/ld+json">
 {!! $schema !!}
 </script>
+<?php
+use Illuminate\Support\Facades\URL;
+?>
+<style>
+    .review-form-card {
+        margin-top: 24px;
+        padding: 1.5rem;
+        border: 1px solid #e7e9ef;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #ffffff 0%, #fbfcff 100%);
+        box-shadow: 0 10px 30px rgba(25, 34, 66, 0.06);
+    }
+
+    .review-form-card h6 {
+        margin-bottom: 1rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1e2538;
+    }
+
+    .review-form-card .form-label {
+        margin-bottom: 0.45rem;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #4c556e;
+    }
+
+    .review-form-card .form-control {
+        border: 1px solid #dbe0eb;
+        border-radius: 10px;
+        padding: 0.62rem 0.78rem;
+    }
+
+    .review-form-card .form-control:focus {
+        border-color: #b8c5ea;
+        box-shadow: 0 0 0 0.2rem rgba(73, 101, 183, 0.15);
+    }
+
+    .star-rating-group {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .star-rating {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        gap: 0.25rem;
+    }
+
+    .star-rating input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .star-rating label {
+        font-size: 2rem;
+        line-height: 1;
+        color: #cfd5e2;
+        cursor: pointer;
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+        color: #f5b301;
+        transform: translateY(-1px);
+    }
+
+    .star-rating-caption {
+        min-width: 120px;
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: #6c748b;
+    }
+
+    .review-submit-btn {
+        border: none;
+        border-radius: 10px;
+        padding: 0.72rem 1.2rem;
+        font-weight: 600;
+        color: #ffffff;
+        background: linear-gradient(135deg, #243b67 0%, #3f5ea2 100%);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .review-submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(36, 59, 103, 0.28);
+    }
+
+    @media (max-width: 575px) {
+        .review-form-card {
+            padding: 1rem;
+        }
+
+        .star-rating label {
+            font-size: 1.7rem;
+        }
+    }
+</style>
 @endsection
 
 <?php
@@ -280,6 +384,73 @@ use App\Helpers\Helper;
                                 <?php } } else {?>
                                     <h6>No reviews yet</h6>
                                 <?php }?>
+
+                                <?php if(session('user_id')) {?>
+                                    <form method="POST" action="" class="review-form-card">
+                                        @csrf
+                                        <input type="hidden" name="user_id" value="<?= session('user_id') ?>">
+                                        <input type="hidden" name="product_id" value="<?= $product->id ?>">
+                                        <input type="hidden" name="name" value="<?= session('name') ?>">
+                                        <input type="hidden" name="email" value="<?= session('email') ?>">
+
+                                        <h6>Write a Review</h6>
+
+                                        <div class="mb-3">
+                                            <label for="review_title" class="form-label">Review Title</label>
+                                            <input
+                                                type="text"
+                                                name="title"
+                                                id="review_title"
+                                                class="form-control"
+                                                placeholder="Summarize your experience"
+                                                value="<?= e(old('title')) ?>"
+                                                required
+                                            >
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="review_comment" class="form-label">Your Comment</label>
+                                            <textarea
+                                                name="comment"
+                                                id="review_comment"
+                                                class="form-control"
+                                                rows="4"
+                                                placeholder="Share what you liked and what can be improved"
+                                                required
+                                            ><?= e(old('comment')) ?></textarea>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="form-label d-block">Your Rating</label>
+                                            <div class="star-rating-group">
+                                                <div class="star-rating" aria-label="Select rating from 1 to 5 stars">
+                                                    <input type="radio" id="rating-5" name="rating" value="5" <?= old('rating') == 5 ? 'checked' : '' ?> required>
+                                                    <label for="rating-5" title="5 stars" aria-label="5 stars">&#9733;</label>
+
+                                                    <input type="radio" id="rating-4" name="rating" value="4" <?= old('rating') == 4 ? 'checked' : '' ?>>
+                                                    <label for="rating-4" title="4 stars" aria-label="4 stars">&#9733;</label>
+
+                                                    <input type="radio" id="rating-3" name="rating" value="3" <?= old('rating') == 3 ? 'checked' : '' ?>>
+                                                    <label for="rating-3" title="3 stars" aria-label="3 stars">&#9733;</label>
+
+                                                    <input type="radio" id="rating-2" name="rating" value="2" <?= old('rating') == 2 ? 'checked' : '' ?>>
+                                                    <label for="rating-2" title="2 stars" aria-label="2 stars">&#9733;</label>
+
+                                                    <input type="radio" id="rating-1" name="rating" value="1" <?= old('rating') == 1 ? 'checked' : '' ?>>
+                                                    <label for="rating-1" title="1 star" aria-label="1 star">&#9733;</label>
+                                                </div>
+                                                <span class="star-rating-caption" id="rating-text">Select a rating</span>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="review-submit-btn">Submit Review</button>
+                                    </form>
+                                <?php } else {?>
+                                    <p style="text-align: center;margin-top: 10px;display: flex; justify-content: center;">
+                                        <?php $currentUrl = URL::full(); ?>
+                                        <a class="addtocartBtn" href="<?= url('signin/' . Helper::encoded($currentUrl)) ?>">Please Sign In to Write a Review</a>
+                                    </p>
+                                <?php }?>
                             </div>
                             <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
                                 <div class="productattr">
@@ -445,4 +616,27 @@ function getSizeWisePrice(productId, parentAttrId, attrValId) {
         }
     });
 }
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const reviewRatingInputs = document.querySelectorAll('.star-rating input[name="rating"]');
+    const reviewRatingText = document.getElementById('rating-text');
+
+    if (!reviewRatingInputs.length || !reviewRatingText) {
+        return;
+    }
+
+    const updateReviewRatingText = function (value) {
+        reviewRatingText.textContent = value ? value + ' out of 5 selected' : 'Select a rating';
+    };
+
+    reviewRatingInputs.forEach(function (input) {
+        input.addEventListener('change', function () {
+            updateReviewRatingText(this.value);
+        });
+    });
+
+    const checkedRating = document.querySelector('.star-rating input[name="rating"]:checked');
+    updateReviewRatingText(checkedRating ? checkedRating.value : '');
+});
 </script>

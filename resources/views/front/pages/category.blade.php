@@ -26,9 +26,12 @@ $current_url = url()->full();
                         <img src="<?=env('FRONT_ASSETS_URL')?>images/grid_icon.png" alt="icon"> All Sub Categories
                         <a href="<?= $current_url ?>"><button>Clear</button></a>
                     </h3>
-                    <?php
-                    // print_r($filter_subcat);
-                    ?>
+                    @if(session('success_message'))
+                        <h6 class="alert alert-success autohide mt-3">{{ session('success_message') }}</h6>
+                    @endif
+                    @if(session('error_message'))
+                        <h6 class="alert alert-danger autohide mt-3">{{ session('error_message') }}</h6>
+                    @endif
                     <div class="accordion">
                         <form action="" method="POST">
                             @csrf
@@ -42,7 +45,9 @@ $current_url = url()->full();
                                     </li>
                                 <?php } }?>
                             </ul>
-                            <button type="submit" class="btn common-btn" style="display: flex;margin: 0 auto;">Filter</button>
+                            <?php if(count($subcategory) > 0){?>
+                                <button type="submit" class="btn common-btn" style="display: flex;margin: 0 auto;">Filter</button>
+                            <?php } ?>
                         </form>
                     </div>
                 </div>

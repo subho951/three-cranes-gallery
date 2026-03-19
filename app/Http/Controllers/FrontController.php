@@ -91,7 +91,10 @@ class FrontController extends Controller
 
         if ($request->method() === 'POST') {
             $postData                                   = $request->all();
-            // print_r($postData['subcat']);die;
+            if(!array_key_exists('subcat', $postData)){
+                return redirect(url('products/' . $slug))->with('error_message', 'At least select one sub category.');                
+            }
+            
             $subcat = implode(', ',$postData['subcat']);
             $data['products']               = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->whereIn('sub_category', [$subcat])
                                 ->where('main_category', $parent_id)
@@ -313,29 +316,29 @@ class FrontController extends Controller
                 'title'         => $postData['title'],
                 'comment'       => $postData['comment'],
             ];
-            // Helper::pr($fields);
+            Helper::pr($fields);
             UserReview::insert($fields);
             $uId                                = $postData['user_id'];
             $getUser                            = User::where('id', '=', $uId)->first();
             $product_id                         = $postData['product_id'];
             $getProduct                         = Product::where('id', '=', $product_id)->first();
             /* email functionality */
-            $mailData['getProduct']     = $getProduct;
-            $mailData['getReview']      = $fields;
-            $mailData['mailHeader']     = 'Review successfully submitted on ' . $mailData['getProduct']->name;
-            $message                    = view('email-templates.review-submit', $mailData);
-            $generalSetting             = GeneralSetting::find('1');
-            $subject                    = $generalSetting->site_name . ' :: Review successfully submitted on ' . $mailData['getProduct']->name;
-            $this->sendMail($generalSetting->system_email, $subject, $message);
+                $mailData['getProduct']     = $getProduct;
+                $mailData['getReview']      = $fields;
+                $mailData['mailHeader']     = 'Review successfully submitted on ' . $mailData['getProduct']->name;
+                $message                    = view('email-templates.review-submit', $mailData);
+                $generalSetting             = GeneralSetting::find('1');
+                $subject                    = $generalSetting->site_name . ' :: Review successfully submitted on ' . $mailData['getProduct']->name;
+                $this->sendMail($generalSetting->system_email, $subject, $message);
             /* email functionality */
             /* email log save */
-            $postData2 = [
-                'name'                  => $getUser->first_name . ' ' . $getUser->last_name,
-                'email'                 => $getUser->email,
-                'subject'               => $subject,
-                'message'               => $message
-            ];
-            EmailLog::insertGetId($postData2);
+                $postData2 = [
+                    'name'                  => $getUser->first_name . ' ' . $getUser->last_name,
+                    'email'                 => $getUser->email,
+                    'subject'               => $subject,
+                    'message'               => $message
+                ];
+                EmailLog::insertGetId($postData2);
             /* email log save */
             $currentUrl = url('product-details/' . Helper::encoded($postData['product_id']));
             return redirect($currentUrl)->with('success_message', 'Product Review Submitted Successfully. Wait For Admin Approval !!!');
@@ -1269,11 +1272,12 @@ class FrontController extends Controller
     {
         $deviceId       = $this->createDeviceFingerprint();
         $postData       = $request->all();
-        $expiry         = explode('/', $postData['expiry']);
+        $order_id       = 0;
         // Helper::pr($postData);
         /* order place */
-        if ($postData['mode'] == 'order') {
+        if (($postData['mode'] ?? '') == 'order') {
             $uId                            = session('user_id');
+            $selectedPaymentMethod          = $postData['payment_method'] ?? '';
             $getLastEnquiry                 = Order::orderBy('id', 'DESC')->first();
             if ($getLastEnquiry) {
                 $sl_no              = $getLastEnquiry->sl_no;
@@ -1392,7 +1396,7 @@ class FrontController extends Controller
                 'shipping_amt'      => $postData['shipping_amt'],
                 'tax_amt'           => $postData['tax_amt'],
                 'net_amt'           => $postData['net_amt'],
-                'payment_mode'      => $postData['payment_method'],
+                'payment_mode'      => $selectedPaymentMethod,
                 'checkout_type'     => $postData['checkout_type'],
             ];
             // Helper::pr($fields1);die;
@@ -1406,15 +1410,34 @@ class FrontController extends Controller
                 ];
                 // OrderDetail::where('cust_device_id', '=', $deviceId)->where('order_id', '=', 0)->where('is_cart', '=', 1)->update($fields2);
                 OrderDetail::where('cust_device_id', '=', $deviceId)->where('is_cart', '=', 1)->update($fields2);
-                if ($postData['payment_method'] == 'STRIPE') {
+                if ($selectedPaymentMethod == 'STRIPE') {
                     $request->session()->forget(['is_coupon', 'sess_coupon_code', 'sess_disc_type']);
                     return redirect(url('pay-by-card/' . Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
-                } elseif ($postData['payment_method'] == 'PAYPAL') {
+                } elseif ($selectedPaymentMethod == 'PAYPAL') {
                     return redirect(url('pay-by-paypal/' . Helper::encoded($order_id)))->with('success_message', 'Kindly Pay To Complete The Order !!!');
+                } elseif ($selectedPaymentMethod != 'AUTHORIZE.NET') {
+                    return redirect(url('checkout/'))->with('error_message', 'Invalid payment method selected.');
                 }
+            } else {
+                return redirect(url('checkout/'))->with('error_message', 'Unable to create order. Please try again.');
             }
+        } else {
+            return redirect(url('checkout/'))->with('error_message', 'Invalid checkout request.');
         }
         /* order place */
+
+        // Authorize.Net-only fields should be validated only for that flow.
+        $expiryRaw       = trim((string)($postData['expiry'] ?? ''));
+        $expiry          = explode('/', $expiryRaw);
+        $expiryMonth     = trim((string)($expiry[0] ?? ''));
+        $expiryYear      = trim((string)($expiry[1] ?? ''));
+        $cardNumber      = trim((string)($postData['card_number'] ?? ''));
+        $cvc             = trim((string)($postData['cvc'] ?? ''));
+
+        if ($cardNumber === '' || $expiryMonth === '' || $expiryYear === '' || $cvc === '') {
+            return redirect(url('checkout/'))->with('error_message', 'Card details are required for card payment.');
+        }
+
         /* authorise.net payment process */
         $getOrder = Order::where('id', '=', $order_id)->first();
         $merchantAuthentication = new AnetAPI\MerchantAuthenticationType();
@@ -1423,9 +1446,9 @@ class FrontController extends Controller
 
         // === Payment Information (from Accept.js opaqueData or raw card for test) ===
         $creditCard = new AnetAPI\CreditCardType();
-        $creditCard->setCardNumber($request->card_number);
-        $creditCard->setExpirationDate($expiry[0] . "-" . $expiry[1]);
-        $creditCard->setCardCode($request->cvc);
+        $creditCard->setCardNumber($cardNumber);
+        $creditCard->setExpirationDate($expiryMonth . "-" . $expiryYear);
+        $creditCard->setCardCode($cvc);
 
         $paymentOne = new AnetAPI\PaymentType();
         $paymentOne->setCreditCard($creditCard);
@@ -1912,7 +1935,7 @@ class FrontController extends Controller
                     $sessionData = Auth::guard('web')->user();
                     $request->session()->put('user_id', $sessionData['id']);
                     // $request->session()->put('name', $sessionData['first_name'].' '.$sessionData['last_name']);
-                    $request->session()->put('name', $sessionData['display_name']);
+                    $request->session()->put('name', $sessionData['first_name'].' '.$sessionData['last_name']);
                     $request->session()->put('email', $sessionData['email']);
                     // Helper::pr($request->session()->all());die;
                     /* user activity */

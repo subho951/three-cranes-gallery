@@ -557,22 +557,22 @@ function formatCartItems($items)
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3 mt-3">
-                                        <input placeholder="Card Number" class="form-control" maxlength="16" minlength="16" type="text" name="card_number" id="card_number" required>
+                                        <input placeholder="Card Number" class="form-control" maxlength="16" minlength="16" type="text" name="card_number" id="card_number">
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3">
-                                        <input placeholder="Card Name" class="form-control" type="text" name="name" id="card_name" required>
+                                        <input placeholder="Card Name" class="form-control" type="text" name="name" id="card_name">
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
-                                        <input placeholder="MM/YYYY" class="form-control" name="expiry" id="expiry" required>
+                                        <input placeholder="MM/YYYY" class="form-control" name="expiry" id="expiry">
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
-                                        <input placeholder="CVC" class="form-control" maxlength="3" minlength="3" type="password" name="cvc" id="cvc" required>
+                                        <input placeholder="CVC" class="form-control" maxlength="3" minlength="3" type="password" name="cvc" id="cvc">
                                     </div>
                                 </div>
                                 <div class="col-lg-12 text-end">
@@ -759,40 +759,34 @@ function formatCartItems($items)
         });
     });
     $(document).ready(function() {
-        $('input[name="payment_method"]').on('change', function() {
-            // Hide all
+        const $paymentMethods = $('input[name="payment_method"]');
+        const $cardInputs = $('#card_number, #card_name, #expiry, #cvc');
+
+        function updatePaymentView(selectedMethod) {
             $('.payment-box').hide();
+            $('#authorize_div').hide();
 
-            // Show based on selected
-            if ($(this).val() === 'AUTHORIZE.NET') {
+            if (selectedMethod === 'AUTHORIZE.NET') {
                 $('#authorize_div').show();
-                $('#stripe_div').hide();
-                $('#paypal_div').hide();
-
-                $('#card_number').attr('required', true);
-                $('#card_name').attr('required', true);
-                $('#expiry').attr('required', true);
-                $('#cvc').attr('required', true);
-            } else if ($(this).val() === 'STRIPE') {
-                $('#authorize_div').hide();
-                $('#stripe_div').show();
-                $('#paypal_div').hide();
-
-                $('#card_number').attr('required', false);
-                $('#card_name').attr('required', false);
-                $('#expiry').attr('required', false);
-                $('#cvc').attr('required', false);
-            } else if ($(this).val() === 'PAYPAL') {
-                $('#authorize_div').hide();
-                $('#stripe_div').hide();
-                $('#paypal_div').show();
-
-                $('#card_number').attr('required', false);
-                $('#card_name').attr('required', false);
-                $('#expiry').attr('required', false);
-                $('#cvc').attr('required', false);
+                $cardInputs.prop('disabled', false).prop('required', true);
+                return;
             }
+
+            if (selectedMethod === 'PAYPAL') {
+                $('#paypal_div').show();
+            } else {
+                $('#stripe_div').show();
+            }
+
+            // Prevent hidden modal inputs from blocking submission.
+            $cardInputs.prop('required', false).prop('disabled', true);
+        }
+
+        $paymentMethods.on('change', function() {
+            updatePaymentView($(this).val());
         });
+
+        updatePaymentView($paymentMethods.filter(':checked').val() || 'STRIPE');
     });
 </script>
 <script>
