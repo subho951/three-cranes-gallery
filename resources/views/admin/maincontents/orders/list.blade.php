@@ -119,7 +119,7 @@ $controllerRoute = $module['controller_route'];
                     </p>
                     <?php if($row->is_cancel_request == 0){?>
                       <form method="GET" action="<?=url('admin/orders/status-update/'.Helper::encoded($row->id).'/'.Helper::encoded(0))?>">
-                        <?php if($row->status >= 4){?>
+                        <?php if($row->status >= 2){?>
                           <input type="text" class="form-control mb-2" placeholder="Tracking No." name="tracking_number" value="<?=$row->tracking_number?>" required>
                         <?php }?>
                         <select class="form-control" name="status" onchange="this.form.submit();">
