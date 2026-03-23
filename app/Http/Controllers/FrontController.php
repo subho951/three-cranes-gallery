@@ -91,15 +91,19 @@ class FrontController extends Controller
 
         if ($request->method() === 'POST') {
             $postData                                   = $request->all();
+            
             if(!array_key_exists('subcat', $postData)){
                 return redirect(url('products/' . $slug))->with('error_message', 'At least select one sub category.');                
             }
             
-            $subcat = implode(', ',$postData['subcat']);
-            $data['products']               = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')->whereIn('sub_category', [$subcat])
-                                ->where('main_category', $parent_id)
-                                ->where('status', 1)
-                                ->orderBy('id', 'DESC')->paginate(12);
+            $subcat = implode(',',$postData['subcat']);
+            $data['products'] = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')
+                                        ->whereIn('sub_category', $postData['subcat']) // correct
+                                        ->where('main_category', $parent_id)
+                                        ->where('status', 1)
+                                        ->orderBy('id', 'DESC')
+                                        ->paginate(20);
+            // Helper::pr($data['products']);
             
             $data['filter_subcat'] = $postData['subcat'];
 
@@ -312,11 +316,11 @@ class FrontController extends Controller
                 'product_id'    => $postData['product_id'],
                 'name'          => $postData['name'],
                 'email'         => $postData['email'],
-                'rating'        => $postData['stars'],
+                'rating'        => $postData['rating'],
                 'title'         => $postData['title'],
                 'comment'       => $postData['comment'],
             ];
-            Helper::pr($fields);
+            // Helper::pr($fields);
             UserReview::insert($fields);
             $uId                                = $postData['user_id'];
             $getUser                            = User::where('id', '=', $uId)->first();
@@ -340,7 +344,7 @@ class FrontController extends Controller
                 ];
                 EmailLog::insertGetId($postData2);
             /* email log save */
-            $currentUrl = url('product-details/' . Helper::encoded($postData['product_id']));
+            $currentUrl = url('product/'.(($getProduct)?$getProduct->slug:'').'/' . Helper::encoded($postData['product_id']));
             return redirect($currentUrl)->with('success_message', 'Product Review Submitted Successfully. Wait For Admin Approval !!!');
         }
 

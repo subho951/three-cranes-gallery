@@ -322,7 +322,9 @@ $generalSetting = GeneralSetting::find(1);
                             <?php } ?>
                           </td>
                           <td style="width:44%">
-                              <small><?=(($getProduct)?$getProduct->name:'')?></small>
+                              <small><?=(($getProduct)?$getProduct->name:'')?></small><br>
+                              <small><?=(($getProduct)?$getProduct->variation_name:'')?></small><br>  
+                              <small><?=(($getProduct)?$getProduct->product_sku:'')?></small>
                           </td>
                           <td style="width:18%">
                               <p class="muted-red"><?=$sizeColor?></p>

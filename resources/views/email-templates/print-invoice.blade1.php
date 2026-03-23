@@ -270,7 +270,9 @@ $generalSetting = GeneralSetting::find(1);
                             <!-- <img src="data:image/*;base64,<?php echo base64_encode(file_get_contents(base_path('public/uploads/product/' . (($getProduct)?$getProduct->cover_image:'')))); ?>"  height="70" /> -->
                           </td>
                           <td>
-                              <small><?=(($getProduct)?$getProduct->name:'')?></small>
+                              <small><?=(($getProduct)?$getProduct->name:'')?></small><br>
+                              <small><?=(($getProduct)?$getProduct->variation_name:'')?></small><br>  
+                              <small><?=(($getProduct)?$getProduct->product_sku:'')?></small>
                           </td>
                           <td>
                               <?=$orderDetail->qty?> x $<?=number_format($orderDetail->rate,2)?>
