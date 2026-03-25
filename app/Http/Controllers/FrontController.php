@@ -91,10 +91,13 @@ class FrontController extends Controller
 
         if ($request->method() === 'POST') {
             $postData                                   = $request->all();
-            
+            // Helper::pr($postData);
             if(!array_key_exists('subcat', $postData)){
                 return redirect(url('products/' . $slug))->with('error_message', 'At least select one sub category.');                
             }
+
+            // Force reset pagination to page 1
+            $request->merge(['page' => 1]);
             
             $subcat = implode(',',$postData['subcat']);
             $data['products'] = Product::select('id', 'name', 'slug', 'discounted_price', 'cover_image')

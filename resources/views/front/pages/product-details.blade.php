@@ -1,4 +1,8 @@
-
+<?php
+use App\Models\User;
+use App\Models\Order;
+use App\Models\OrderDetail;
+?>
 @section('head')
 <script type="application/ld+json">
 {!! $schema !!}
@@ -338,9 +342,11 @@ use App\Helpers\Helper;
                                 <?php
                                 $reviews            = UserReview::where('product_id', '=', $product->id)->where('status', '=', 1)->orderBy('id', 'DESC')->get();
                                 if(count($reviews) > 0){ foreach($reviews as $review){
+                                    $getUser = User::where('id', '=', $review->user_id)->first();
+
                                 ?>
                                     <div class="reviewList">
-                                        <div class="user-i"><img src="<?=env('FRONT_ASSETS_URL')?>images/testimonial-img.png">
+                                        <div class="user-i"><img src="<?=(($getUser)?(($getUser->profile_image != '')?env('UPLOADS_URL').'user/'.$getUser->profile_image:env('NO_IMAGE')):env('NO_IMAGE'))?>">
                                             <div><b><?=$review->name?></b><span><?=$review->email?></span></div>
                                         </div>
                                         <div class="user-r">
@@ -386,65 +392,75 @@ use App\Helpers\Helper;
                                 <?php }?>
 
                                 <?php if(session('user_id')) {?>
-                                    <form method="POST" action="" class="review-form-card">
-                                        @csrf
-                                        <input type="hidden" name="user_id" value="<?= session('user_id') ?>">
-                                        <input type="hidden" name="product_id" value="<?= $product->id ?>">
-                                        <input type="hidden" name="name" value="<?= session('name') ?>">
-                                        <input type="hidden" name="email" value="<?= session('email') ?>">
+                                    <?php
+                                    $checkProductOrder = OrderDetail::where('cust_id', '=', session('user_id'))->where('product_id', '=', $product->id)->count();
+                                    if($checkProductOrder > 0){?>
+                                    ?>
+                                        <form method="POST" action="" class="review-form-card">
+                                            @csrf
+                                            <input type="hidden" name="user_id" value="<?= session('user_id') ?>">
+                                            <input type="hidden" name="product_id" value="<?= $product->id ?>">
+                                            <input type="hidden" name="name" value="<?= session('name') ?>">
+                                            <input type="hidden" name="email" value="<?= session('email') ?>">
 
-                                        <h6>Write a Review</h6>
+                                            <h6>Write a Review</h6>
 
-                                        <div class="mb-3">
-                                            <label for="review_title" class="form-label">Review Title</label>
-                                            <input
-                                                type="text"
-                                                name="title"
-                                                id="review_title"
-                                                class="form-control"
-                                                placeholder="Summarize your experience"
-                                                value="<?= e(old('title')) ?>"
-                                                required
-                                            >
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="review_comment" class="form-label">Your Comment</label>
-                                            <textarea
-                                                name="comment"
-                                                id="review_comment"
-                                                class="form-control"
-                                                rows="4"
-                                                placeholder="Share what you liked and what can be improved"
-                                                required
-                                            ><?= e(old('comment')) ?></textarea>
-                                        </div>
-
-                                        <div class="mb-4">
-                                            <label class="form-label d-block">Your Rating</label>
-                                            <div class="star-rating-group">
-                                                <div class="star-rating" aria-label="Select rating from 1 to 5 stars">
-                                                    <input type="radio" id="rating-5" name="rating" value="5" <?= old('rating') == 5 ? 'checked' : '' ?> required>
-                                                    <label for="rating-5" title="5 stars" aria-label="5 stars">&#9733;</label>
-
-                                                    <input type="radio" id="rating-4" name="rating" value="4" <?= old('rating') == 4 ? 'checked' : '' ?>>
-                                                    <label for="rating-4" title="4 stars" aria-label="4 stars">&#9733;</label>
-
-                                                    <input type="radio" id="rating-3" name="rating" value="3" <?= old('rating') == 3 ? 'checked' : '' ?>>
-                                                    <label for="rating-3" title="3 stars" aria-label="3 stars">&#9733;</label>
-
-                                                    <input type="radio" id="rating-2" name="rating" value="2" <?= old('rating') == 2 ? 'checked' : '' ?>>
-                                                    <label for="rating-2" title="2 stars" aria-label="2 stars">&#9733;</label>
-
-                                                    <input type="radio" id="rating-1" name="rating" value="1" <?= old('rating') == 1 ? 'checked' : '' ?>>
-                                                    <label for="rating-1" title="1 star" aria-label="1 star">&#9733;</label>
-                                                </div>
-                                                <span class="star-rating-caption" id="rating-text">Select a rating</span>
+                                            <div class="mb-3">
+                                                <label for="review_title" class="form-label">Review Title</label>
+                                                <input
+                                                    type="text"
+                                                    name="title"
+                                                    id="review_title"
+                                                    class="form-control"
+                                                    placeholder="Summarize your experience"
+                                                    value="<?= e(old('title')) ?>"
+                                                    required
+                                                >
                                             </div>
-                                        </div>
 
-                                        <button type="submit" class="review-submit-btn">Submit Review</button>
-                                    </form>
+                                            <div class="mb-3">
+                                                <label for="review_comment" class="form-label">Your Comment</label>
+                                                <textarea
+                                                    name="comment"
+                                                    id="review_comment"
+                                                    class="form-control"
+                                                    rows="4"
+                                                    placeholder="Share what you liked and what can be improved"
+                                                    required
+                                                ><?= e(old('comment')) ?></textarea>
+                                            </div>
+
+                                            <div class="mb-4">
+                                                <label class="form-label d-block">Your Rating</label>
+                                                <div class="star-rating-group">
+                                                    <div class="star-rating" aria-label="Select rating from 1 to 5 stars">
+                                                        <input type="radio" id="rating-5" name="rating" value="5" <?= old('rating') == 5 ? 'checked' : '' ?> required>
+                                                        <label for="rating-5" title="5 stars" aria-label="5 stars">&#9733;</label>
+
+                                                        <input type="radio" id="rating-4" name="rating" value="4" <?= old('rating') == 4 ? 'checked' : '' ?>>
+                                                        <label for="rating-4" title="4 stars" aria-label="4 stars">&#9733;</label>
+
+                                                        <input type="radio" id="rating-3" name="rating" value="3" <?= old('rating') == 3 ? 'checked' : '' ?>>
+                                                        <label for="rating-3" title="3 stars" aria-label="3 stars">&#9733;</label>
+
+                                                        <input type="radio" id="rating-2" name="rating" value="2" <?= old('rating') == 2 ? 'checked' : '' ?>>
+                                                        <label for="rating-2" title="2 stars" aria-label="2 stars">&#9733;</label>
+
+                                                        <input type="radio" id="rating-1" name="rating" value="1" <?= old('rating') == 1 ? 'checked' : '' ?>>
+                                                        <label for="rating-1" title="1 star" aria-label="1 star">&#9733;</label>
+                                                    </div>
+                                                    <span class="star-rating-caption" id="rating-text">Select a rating</span>
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" class="review-submit-btn">Submit Review</button>
+                                        </form>
+                                    <?php } else {?>
+                                        <p style="text-align: center;margin-top: 10px;display: flex; justify-content: center;">
+                                            <?php $currentUrl = URL::full(); ?>
+                                            <a class="addtocartBtn" href="javascript:void(0);">Please purchase this to Write a Review</a>
+                                        </p>
+                                    <?php }?>
                                 <?php } else {?>
                                     <p style="text-align: center;margin-top: 10px;display: flex; justify-content: center;">
                                         <?php $currentUrl = URL::full(); ?>

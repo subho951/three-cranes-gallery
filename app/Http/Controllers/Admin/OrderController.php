@@ -107,11 +107,12 @@ class OrderController extends Controller
             if($status < 4){
                 Order::where('id', '=', $id)->update(['status' => $status]);
             } else {
-                if($request->tracking_number == ''){
-                    return redirect('admin/'.$this->data['controller_route'] . "/list/".Helper::encoded(4).'/'.Helper::encoded(0))->with('error_message', 'Please Update Tracking Number !!!');
-                } else {
-                    Order::where('id', '=', $id)->update(['status' => $status, 'tracking_number' => $request->tracking_number]);
-                }
+                // if($request->tracking_number == ''){
+                //     return redirect('admin/'.$this->data['controller_route'] . "/list/".Helper::encoded(4).'/'.Helper::encoded(0))->with('error_message', 'Please Update Tracking Number !!!');
+                // } else {
+                //     Order::where('id', '=', $id)->update(['status' => $status, 'tracking_number' => $request->tracking_number]);
+                // }
+                Order::where('id', '=', $id)->update(['status' => $status, 'tracking_number' => $request->tracking_number]);
             }
             
             if($status == 1){
