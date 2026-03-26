@@ -395,7 +395,6 @@ use App\Helpers\Helper;
                                     <?php
                                     $checkProductOrder = OrderDetail::where('cust_id', '=', session('user_id'))->where('product_id', '=', $product->id)->count();
                                     if($checkProductOrder > 0){?>
-                                    ?>
                                         <form method="POST" action="" class="review-form-card">
                                             @csrf
                                             <input type="hidden" name="user_id" value="<?= session('user_id') ?>">

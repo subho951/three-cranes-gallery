@@ -973,7 +973,7 @@ class FrontController extends Controller
             }
         }
 
-        $data['countries']              = Country::select('id', 'name')->where('status', '=', 1)->orderBy('name', 'ASC')->get();
+        $data['countries']              = Country::select('id', 'name')->where('status', '=', 1)->where('id', '=', 231)->orderBy('name', 'ASC')->get();
         $title                          = 'Cart';
         $page_name                      = 'cart';
         echo $this->front_before_login_layout($title, $page_name, $data);
@@ -2545,10 +2545,10 @@ class FrontController extends Controller
     private function commonStripePayment($user, $postData, $price, $msg = '')
     {
         $generalSetting = GeneralSetting::where('id', '=', 1)->first();
-        Helper::pr($generalSetting);
-        // $stripeSecret   = ($generalSetting->stripe_payment_type == 1) ? $generalSetting->stripe_sandbox_sk : $generalSetting->stripe_live_sk;
-        $stripeSecret   = $generalSetting->stripe_live_sk;
-        echo $stripeSecret;die;
+        // Helper::pr($generalSetting);
+        $stripeSecret   = ($generalSetting->stripe_payment_type == 1) ? $generalSetting->stripe_sandbox_sk : $generalSetting->stripe_live_sk;
+        // $stripeSecret   = $generalSetting->stripe_live_sk;
+        // echo $stripeSecret;die;
         $stripe         = new \Stripe\StripeClient($stripeSecret);
         try {
             $stripeToken    = $stripe->tokens->create([

@@ -220,7 +220,7 @@ function formatCartItems($items)
                                             @csrf
                                             <input type="hidden" name="mode" value="shipping">
                                             <select name="s_country" id="s_country" class="form-select" onchange="this.form.submit()">
-                                                <option value="" selected>Select Country</option>
+                                                <!-- <option value="" selected>Select Country</option> -->
                                                 <?php if($countries){ foreach($countries as $cty){?>
                                                     <option value="<?= $cty->name ?>" <?= (($cty->name == session('shipping_country'))?'selected':'') ?>><?= $cty->name ?></option>
                                                 <?php } }?>
