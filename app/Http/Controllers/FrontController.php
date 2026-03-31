@@ -431,6 +431,8 @@ class FrontController extends Controller
         $sizeId             = $postData['parent_attr_id'];
         $attrValId          = $postData['attr_val_id'];
 
+        $getProduct = Product::where('id', '=', $productId)->first();
+
         $getProductAttr     = VariationAttribute::select(
                                                             'product_variations.discounted_price'
                                                         )
@@ -442,7 +444,7 @@ class FrontController extends Controller
                                                         ->first();
 
         $apiResponse = [
-            'discounted_price' => number_format((($getProductAttr) ? $getProductAttr->discounted_price : 0.00), 2, '.', '')
+            'discounted_price' => number_format((($getProductAttr) ? (($getProductAttr->discounted_price > 0 )?$getProductAttr->discounted_price:(($getProduct) ? $getProduct->discounted_price : 0.00)) : (($getProduct) ? $getProduct->discounted_price : 0.00)), 2, '.', '')
         ];
         // Helper::pr($apiResponse);
         $this->response_to_json($apiStatus, $apiMessage, $apiResponse, $apiExtraField, $apiExtraData);
@@ -772,7 +774,8 @@ class FrontController extends Controller
                                                 } else {
                                                     $discAmt = $discount_amount;
                                                 }
-                                                $amount_after_disc = ($subtotal - $discAmt);
+                                                $discAmt = min($discAmt, $subtotal);
+                                                $amount_after_disc = max(($subtotal - $discAmt), 0);
                                                 $generalSetting = GeneralSetting::find('1');
                                                 $shipping_charge_percent = $generalSetting->shipping_charge_percent;
                                                 $tax_percent    = $generalSetting->tax_percent;                                                
@@ -798,7 +801,7 @@ class FrontController extends Controller
                                                     $shipping_amt = 0;
                                                 }
                                                 // shipping amount calculate
-                                                $tax_amt        = (($amount_after_disc * $tax_percent) / 100);
+                                                $tax_amt        = (($subtotal * $tax_percent) / 100);
                                                 $net_amt        = ($amount_after_disc + $shipping_amt + $tax_amt);
                                                 $couponData = [
                                                     'coupon_code'       => $coupon_code,
@@ -831,7 +834,8 @@ class FrontController extends Controller
                                                         } else {
                                                             $discAmt = $discount_amount;
                                                         }
-                                                        $amount_after_disc = ($subtotal - $discAmt);
+                                                        $discAmt = min($discAmt, $subtotal);
+                                                        $amount_after_disc = max(($subtotal - $discAmt), 0);
                                                         $generalSetting = GeneralSetting::find('1');
                                                         $shipping_charge_percent = $generalSetting->shipping_charge_percent;
                                                         $tax_percent    = $generalSetting->tax_percent;
@@ -857,7 +861,7 @@ class FrontController extends Controller
                                                             $shipping_amt = 0;
                                                         }
                                                         // shipping amount calculate
-                                                        $tax_amt        = (($amount_after_disc * $tax_percent) / 100);
+                                                        $tax_amt        = (($subtotal * $tax_percent) / 100);
                                                         $net_amt        = ($amount_after_disc + $shipping_amt + $tax_amt);
                                                         $couponData = [
                                                             'coupon_code'       => $coupon_code,
@@ -1021,7 +1025,7 @@ class FrontController extends Controller
                     $shipping_amt = 0;
                 }
                 // shipping amount calculate
-                $tax_amt        = (($amount_after_disc * $tax_percent) / 100);
+                $tax_amt        = (($subtotal * $tax_percent) / 100);
                 $net_amt        = ($amount_after_disc + $shipping_amt + $tax_amt);
                 $couponData = [
                     'coupon_code'       => '',
@@ -1718,7 +1722,7 @@ class FrontController extends Controller
     public function stripeCheckoutSuccess(Request $request, $sessionId)
     {
         $generalSetting = GeneralSetting::where('id', '=', 1)->first();
-        $stripeSecret   = ($generalSetting->stripe_payment_type) ? $generalSetting->stripe_sandbox_sk : $generalSetting->stripe_live_sk;
+        $stripeSecret   = ($generalSetting->stripe_payment_type == 1) ? $generalSetting->stripe_sandbox_sk : $generalSetting->stripe_live_sk;
         $session_id     = $sessionId;
         $stripe         = new \Stripe\StripeClient($stripeSecret);
         $response       = $stripe->checkout->sessions->retrieve($session_id);
@@ -1727,11 +1731,16 @@ class FrontController extends Controller
         \Stripe\Stripe::setApiKey($stripeSecret);
         // $retrievedPaymentIntent = \Stripe\PaymentIntent::all($payment_intent);
         $retrievedPaymentIntent = $stripe->charges->all(['payment_intent' => $payment_intent])->data[0];
-        // Helper::pr($response);
+        // Helper::pr($retrievedPaymentIntent);
+
+        // $paymentIntent = \Stripe\PaymentIntent::retrieve($retrievedPaymentIntent->payment_intent);
+        // Helper::pr($paymentIntent);
+        // $chargeId = $paymentIntent->charges->data[0]->id;
+
         $stripeData = [
             'status'                => TRUE,
             'payment_gateway_id'    => $retrievedPaymentIntent->payment_intent,
-            'transaction_id'        => $retrievedPaymentIntent->balance_transaction,
+            'transaction_id'        => $retrievedPaymentIntent->id,
             'customer_id'           => $retrievedPaymentIntent->customer,
             'customer_card_id'      => $retrievedPaymentIntent->payment_method,
             'currency'              => $retrievedPaymentIntent->currency,
@@ -1741,6 +1750,8 @@ class FrontController extends Controller
             // 'expiry_month'          => $retrievedPaymentIntent->payment_method_details->card->exp_month,
             // 'expiry_year'           => $retrievedPaymentIntent->payment_method_details->card->exp_year,
         ];
+        // Helper::pr($stripeData);
+
         if ($stripeData['status']) {
             $userSubscriptionData = [
                 'payment_status'                => $stripeData['status'],

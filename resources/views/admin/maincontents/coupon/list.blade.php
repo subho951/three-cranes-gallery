@@ -68,7 +68,7 @@ $controllerRoute = $module['controller_route'];
                   <td>
                     <?php
                     $category = Category::select('id', 'category_name')->where('id', '=', $row->category)->first();
-                    echo (($category)?$category->category_name:'');
+                    echo (($category)?$category->category_name:'All Category');
                     ?>
                   </td>
                   <td>

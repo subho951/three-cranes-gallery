@@ -104,7 +104,7 @@ $controllerRoute = $module['controller_route'];
               <label for="category" class="col-md-2 col-lg-2 col-form-label">Category</label>
               <div class="col-md-10 col-lg-10">
                 <select name="category" class="form-control" id="category">
-                  <option value="" selected>Select Category</option>
+                  <option value="0" <?=(($category == 0)?'selected':'')?>>All Category</option>
                   <?php if($child_cats){ foreach($child_cats as $row){?>
                     <option value="<?=$row->id?>" <?=(($row->id == $category)?'selected':'')?>><?=$row->category_name?></option>
                   <?php } }?>

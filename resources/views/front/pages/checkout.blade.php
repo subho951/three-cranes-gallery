@@ -400,10 +400,7 @@ function formatCartItems($items)
                                     $getProduct    = Product::select('id', 'name', 'slug', 'cover_image')->where('id', '=', $cartItem->product_id)->first();
                                     $subtotal_tot        += $cartItem->subtotal;
                                     $disc_tot            += $cartItem->disc_amount;
-                                    $after_disc_tot      += $cartItem->amount_after_disc;
                                     $shipping_tot        += $cartItem->shipping_amt;
-                                    $tax_tot             += $cartItem->tax_amt;
-                                    $net_tot             += $cartItem->net_amt;
                                     $parent_id_val       = json_decode($cartItem->parent_id_val);
                                     $child_id_val        = json_decode($cartItem->child_id_val);
                             ?>
@@ -427,6 +424,12 @@ function formatCartItems($items)
                                     </div>
                             <?php }
                             } ?>
+                            <?php
+                            $disc_tot           = max(min($disc_tot, $subtotal_tot), 0);
+                            $after_disc_tot     = max(($subtotal_tot - $disc_tot), 0);
+                            $tax_tot            = (($subtotal_tot * $generalSetting->tax_percent) / 100);
+                            $net_tot            = ($after_disc_tot + $shipping_tot + $tax_tot);
+                            ?>
                             <div class="cart-subtotal-list">
                                 <h2>Subtotal</h2>
                                 <div class="subtotal-price">
